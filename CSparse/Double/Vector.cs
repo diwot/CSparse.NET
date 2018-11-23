@@ -6,6 +6,7 @@
 
 namespace CSparse.Double
 {
+    using Real = System.Double;
     using System;
 
     /// <summary>
@@ -18,9 +19,9 @@ namespace CSparse.Double
         /// </summary>
         /// <param name="src">The source array.</param>
         /// <param name="dst">The destination array.</param>
-        public static void Copy(double[] src, double[] dst)
+        public static void Copy(Real[] src, Real[] dst)
         {
-            Buffer.BlockCopy(src, 0, dst, 0, src.Length * Constants.SizeOfDouble);
+            Buffer.BlockCopy(src, 0, dst, 0, src.Length * sizeof(Real));
         }
 
         /// <summary>
@@ -29,17 +30,17 @@ namespace CSparse.Double
         /// <param name="src">The source array.</param>
         /// <param name="dst">The destination array.</param>
         /// <param name="n">Number of values to copy.</param>
-        public static void Copy(double[] src, double[] dst, int n)
+        public static void Copy(Real[] src, Real[] dst, int n)
         {
-            Buffer.BlockCopy(src, 0, dst, 0, n * Constants.SizeOfDouble);
+            Buffer.BlockCopy(src, 0, dst, 0, n * sizeof(Real));
         }
 
         /// <summary>
         /// Create a new vector.
         /// </summary>
-        public static double[] Create(int length, double value)
+        public static Real[] Create(int length, Real value)
         {
-            double[] result = new double[length];
+            Real[] result = new Real[length];
 
             for (int i = 0; i < length; i++)
             {
@@ -52,11 +53,11 @@ namespace CSparse.Double
         /// <summary>
         /// Clone the given vector.
         /// </summary>
-        public static double[] Clone(double[] src)
+        public static Real[] Clone(Real[] src)
         {
-            double[] result = new double[src.Length];
+            Real[] result = new Real[src.Length];
 
-            Buffer.BlockCopy(src, 0, result, 0, src.Length * Constants.SizeOfDouble);
+            Buffer.BlockCopy(src, 0, result, 0, src.Length * sizeof(Real));
 
             return result;
         }
@@ -64,7 +65,7 @@ namespace CSparse.Double
         /// <summary>
         /// Set vector values to zero.
         /// </summary>
-        public static void Clear(double[] x)
+        public static void Clear(Real[] x)
         {
             Array.Clear(x, 0, x.Length);
         }
@@ -72,11 +73,11 @@ namespace CSparse.Double
         /// <summary>
         /// Computes the dot product of two vectors.
         /// </summary>
-        public static double DotProduct(double[] x, double[] y)
+        public static Real DotProduct(Real[] x, Real[] y)
         {
             int length = x.Length;
 
-            double result = 0.0;
+            Real result = (Real)0.0;
 
             for (int i = 0; i < length; i++)
             {
@@ -89,7 +90,7 @@ namespace CSparse.Double
         /// <summary>
         /// Computes the pointwise product of two vectors.
         /// </summary>
-        public static void PointwiseMultiply(double[] x, double[] y, double[] z)
+        public static void PointwiseMultiply(Real[] x, Real[] y, Real[] z)
         {
             int length = x.Length;
 
@@ -102,37 +103,38 @@ namespace CSparse.Double
         /// <summary>
         /// Computes the norm of a vector, sqrt( x' * x ).
         /// </summary>
-        public static double Norm(double[] x)
+        public static Real Norm(Real[] x)
         {
             int length = x.Length;
 
-            double result = 0.0;
+            Real result = (Real)0.0;
 
             for (int i = 0; i < length; ++i)
             {
                 result += x[i] * x[i];
             }
 
-            return Math.Sqrt(result);
+            return (Real)Math.Sqrt(result);
         }
 
         /// <summary>
         /// Computes the norm of a vector avoiding overflow, sqrt( x' * x ).
         /// </summary>
-        public static double NormRobust(double[] x)
+        public static Real NormRobust(Real[] x)
         {
             int length = x.Length;
 
-            double scale = 0.0, ssq = 1.0;
+            Real scale = (Real)0.0, ssq = (Real)1.0;
+            const Real one = (Real)1.0;
 
             for (int i = 0; i < length; ++i)
             {
                 if (x[i] != 0.0)
                 {
-                    double absxi = Math.Abs(x[i]);
+                    Real absxi = Math.Abs(x[i]);
                     if (scale < absxi)
                     {
-                        ssq = 1.0 + ssq * (scale / absxi) * (scale / absxi);
+                        ssq = one + ssq * (scale / absxi) * (scale / absxi);
                         scale = absxi;
                     }
                     else
@@ -142,13 +144,13 @@ namespace CSparse.Double
                 }
             }
 
-            return scale * Math.Sqrt(ssq);
+            return scale * (Real)Math.Sqrt(ssq);
         }
 
         /// <summary>
         /// Scales a vector by a given factor, x = alpha * x.
         /// </summary>
-        public static void Scale(double alpha, double[] x)
+        public static void Scale(Real alpha, Real[] x)
         {
             int length = x.Length;
 
@@ -161,7 +163,7 @@ namespace CSparse.Double
         /// <summary>
         /// Add a scaled vector to another vector, y = y + alpha * x.
         /// </summary>
-        public static void Axpy(double alpha, double[] x, double[] y)
+        public static void Axpy(Real alpha, Real[] x, Real[] y)
         {
             int length = x.Length;
 
@@ -174,7 +176,7 @@ namespace CSparse.Double
         /// <summary>
         /// Add two scaled vectors, z = alpha * x + beta * y.
         /// </summary>
-        public static void Add(double alpha, double[] x, double beta, double[] y, double[] z)
+        public static void Add(Real alpha, Real[] x, Real beta, Real[] y, Real[] z)
         {
             int length = x.Length;
 

@@ -15,7 +15,7 @@ namespace CSparse.Tests.Complex.Factorization
         public void TestSolve()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<Complex>("hermitian-40-spd.mat");
+            var A = ResourceLoader.Get<Complex, double>("hermitian-40-spd.mat");
 
             // Create test data.
             var x = Helper.CreateTestVector(A.ColumnCount);
@@ -37,7 +37,7 @@ namespace CSparse.Tests.Complex.Factorization
         public void TestConstructorThrowsOnNonSpd()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<Complex>("hermitian-40.mat");
+            var A = ResourceLoader.Get<Complex, double>("hermitian-40.mat");
 
             Assert.Throws<Exception>(() =>
             {

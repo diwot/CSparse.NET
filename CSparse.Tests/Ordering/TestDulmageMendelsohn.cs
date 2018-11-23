@@ -11,7 +11,7 @@ namespace CSparse.Tests.Ordering
         public void TestGenerate1()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<double>("general-40x40.mat");
+            var A = ResourceLoader.Get<double, double>("general-40x40.mat");
 
             int n = A.ColumnCount;
 
@@ -25,7 +25,7 @@ namespace CSparse.Tests.Ordering
         public void TestGenerate2()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<double>("general-40x20.mat");
+            var A = ResourceLoader.Get<double, double>("general-40x20.mat");
 
             int n = Math.Min(A.RowCount, A.ColumnCount);
 

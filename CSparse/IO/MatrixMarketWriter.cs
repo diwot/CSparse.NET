@@ -24,7 +24,7 @@ namespace CSparse.IO
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <param name="matrix">The matrix to write.</param>
-        public static void WriteMatrix<T>(string filePath, Matrix<T> matrix)
+        public static void WriteMatrix<T, Scalar>(string filePath, Matrix<T, Scalar> matrix)
             where T : struct, IEquatable<T>, IFormattable
         {
             using (var stream = File.Create(filePath))
@@ -41,7 +41,7 @@ namespace CSparse.IO
         /// </summary>
         /// <param name="stream">The stream to write to.</param>
         /// <param name="matrix">The matrix to write.</param>
-        public static void WriteMatrix<T>(Stream stream, Matrix<T> matrix)
+        public static void WriteMatrix<T, Scalar>(Stream stream, Matrix<T, Scalar> matrix)
             where T : struct, IEquatable<T>, IFormattable
         {
             using (var writer = new StreamWriter(stream))
@@ -55,13 +55,13 @@ namespace CSparse.IO
         /// </summary>
         /// <param name="writer">The stream to write to.</param>
         /// <param name="matrix">The matrix to write.</param>
-        public static void WriteMatrix<T>(StreamWriter writer, Matrix<T> matrix)
+        public static void WriteMatrix<T, Scalar>(StreamWriter writer, Matrix<T, Scalar> matrix)
             where T : struct, IEquatable<T>, IFormattable
         {
             var complex = typeof(T) == typeof(Complex);
             var format = CreateValueFormatter<T>();
 
-            var sparse = matrix as CompressedColumnStorage<T>;
+            var sparse = matrix as CompressedColumnStorage<T, Scalar>;
             if (sparse != null)
             {
                 writer.WriteLine("%%MatrixMarket matrix coordinate {0} general", complex ? "complex" : "real");
@@ -78,7 +78,7 @@ namespace CSparse.IO
                 return;
             }
             
-            var dense = matrix as DenseColumnMajorStorage<T>;
+            var dense = matrix as DenseColumnMajorStorage<T, Scalar>;
             if (dense != null)
             {
                 writer.WriteLine("%%MatrixMarket matrix array {0} general", complex ? "complex" : "real");

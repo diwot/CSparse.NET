@@ -419,7 +419,7 @@ namespace CSparse.Storage
             return nz;
         }
 
-        internal static SymbolicColumnStorage Create<T>(CompressedColumnStorage<T> mat, bool allocate = true)
+        internal static SymbolicColumnStorage Create<T, Scalar>(CompressedColumnStorage<T, Scalar> mat, bool allocate = true)
              where T : struct, IEquatable<T>, IFormattable
         {
             int m = mat.RowCount;

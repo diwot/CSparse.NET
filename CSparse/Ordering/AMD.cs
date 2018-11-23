@@ -27,7 +27,7 @@ namespace CSparse.Ordering
         /// See Chapter 7.1 (Fill-reducing orderings: Minimum degree ordering) in 
         /// "Direct Methods for Sparse Linear Systems" by Tim Davis.
         /// </remarks>
-        public static int[] Generate<T>(CompressedColumnStorage<T> A, ColumnOrdering order)
+        public static int[] Generate<T, Scalar>(CompressedColumnStorage<T, Scalar> A, ColumnOrdering order)
             where T : struct, IEquatable<T>, IFormattable
         {
             int[] Cp, Ci, P, W, nv, next, head, elen, degree, w, hhead;

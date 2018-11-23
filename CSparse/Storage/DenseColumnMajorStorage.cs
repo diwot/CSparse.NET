@@ -7,12 +7,34 @@ namespace CSparse.Storage
     using System.Collections.Generic;
     using System.Numerics;
 
+    ///// <summary>
+    ///// Dense column-major matrix storage.
+    ///// </summary>
+    ///// <typeparam name="T"></typeparam>
+    //public abstract class DenseColumnMajorStorage<T> : DenseColumnMajorStorage<T, double>
+    //   where T : struct, IEquatable<T>, IFormattable
+    //{
+    //    /// <summary>
+    //    /// Initializes a new instance of the DenseColumnMajorStorage class.
+    //    /// </summary>
+    //    public DenseColumnMajorStorage(int rows, int columns) : base(rows, columns)
+    //    {
+    //    }
+
+    //    /// <summary>
+    //    /// Initializes a new instance of the DenseColumnMajorStorage class.
+    //    /// </summary>
+    //    public DenseColumnMajorStorage(int rows, int columns, T[] values) : base(rows, columns, values)
+    //    {
+    //    }
+    //}
+
     /// <summary>
     /// Dense column-major matrix storage.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Serializable]
-    public abstract class DenseColumnMajorStorage<T> : Matrix<T>
+    public abstract class DenseColumnMajorStorage<T, Scalar> : Matrix<T, Scalar>
         where T : struct, IEquatable<T>, IFormattable
     {
         /// <summary>
@@ -133,9 +155,9 @@ namespace CSparse.Storage
         /// <summary>
         /// Returns the transpose of this matrix.
         /// </summary>
-        public virtual DenseColumnMajorStorage<T> Transpose()
+        public virtual DenseColumnMajorStorage<T, Scalar> Transpose()
         {
-            var result = DenseColumnMajorStorage<T>.Create(columnCount, rowCount);
+            var result = DenseColumnMajorStorage<T, Scalar>.Create(columnCount, rowCount);
             this.Transpose(result);
             return result;
         }
@@ -143,7 +165,7 @@ namespace CSparse.Storage
         /// <summary>
         /// Transpose this matrix and store the result in given matrix.
         /// </summary>
-        public virtual void Transpose(DenseColumnMajorStorage<T> result)
+        public virtual void Transpose(DenseColumnMajorStorage<T, Scalar> result)
         {
             var target = result.Values;
 
@@ -160,7 +182,7 @@ namespace CSparse.Storage
         /// <summary>
         /// Adds two matrices in CSC format, C = A + B, where A is current instance.
         /// </summary>
-        public DenseColumnMajorStorage<T> Add(DenseColumnMajorStorage<T> other)
+        public DenseColumnMajorStorage<T, Scalar> Add(DenseColumnMajorStorage<T, Scalar> other)
         {
             int m = this.rowCount;
             int n = this.columnCount;
@@ -171,7 +193,7 @@ namespace CSparse.Storage
                 throw new ArgumentException(Resources.MatrixDimensions, "other");
             }
 
-            var result = DenseColumnMajorStorage<T>.Create(m, n);
+            var result = DenseColumnMajorStorage<T, Scalar>.Create(m, n);
 
             Add(other, result);
 
@@ -183,14 +205,14 @@ namespace CSparse.Storage
         /// </summary>
         /// <param name="other">The matrix added to this instance.</param>
         /// <param name="result">Contains the sum.</param>
-        public abstract void Add(DenseColumnMajorStorage<T> other, DenseColumnMajorStorage<T> result);
+        public abstract void Add(DenseColumnMajorStorage<T, Scalar> other, DenseColumnMajorStorage<T, Scalar> result);
 
         /// <summary>
         /// Dense matrix multiplication, C = A*B
         /// </summary>
         /// <param name="other">Dense matrix</param>
         /// <returns>C = A*B, null on error</returns>
-        public DenseColumnMajorStorage<T> Multiply(DenseColumnMajorStorage<T> other)
+        public DenseColumnMajorStorage<T, Scalar> Multiply(DenseColumnMajorStorage<T, Scalar> other)
         {
             // A = (3x4)
             // B = (4x5)
@@ -204,7 +226,7 @@ namespace CSparse.Storage
                 throw new ArgumentException(Resources.MatrixDimensions, "other");
             }
 
-            var result = DenseColumnMajorStorage<T>.Create(m, n);
+            var result = DenseColumnMajorStorage<T, Scalar>.Create(m, n);
 
             Multiply(other, result);
 
@@ -216,27 +238,27 @@ namespace CSparse.Storage
         /// </summary>
         /// <param name="other">The matrix multiplied to this instance.</param>
         /// <param name="result">The product matrix.</param>
-        public abstract void Multiply(DenseColumnMajorStorage<T> other, DenseColumnMajorStorage<T> result);
+        public abstract void Multiply(DenseColumnMajorStorage<T, Scalar> other, DenseColumnMajorStorage<T, Scalar> result);
 
         /// <summary>
         /// Pointwise multiplies this matrix with another matrix and stores the result into the result matrix.
         /// </summary>
         /// <param name="other">The matrix to pointwise multiply with this one.</param>
         /// <param name="result">The matrix to store the result of the pointwise multiplication.</param>
-        public abstract void PointwiseMultiply(DenseColumnMajorStorage<T> other, DenseColumnMajorStorage<T> result);
+        public abstract void PointwiseMultiply(DenseColumnMajorStorage<T, Scalar> other, DenseColumnMajorStorage<T, Scalar> result);
 
         #endregion
 
         /// <summary>
         /// Returns a clone of this matrix.
         /// </summary>
-        public abstract DenseColumnMajorStorage<T> Clone();
+        public abstract DenseColumnMajorStorage<T, Scalar> Clone();
 
         /// <summary>
         /// Returns a new matrix containing the upper triangle of this matrix.
         /// </summary>
         /// <returns>The upper triangle of this matrix.</returns>
-        public virtual DenseColumnMajorStorage<T> UpperTriangle()
+        public virtual DenseColumnMajorStorage<T, Scalar> UpperTriangle()
         {
             var result = Create(RowCount, ColumnCount);
 
@@ -255,7 +277,7 @@ namespace CSparse.Storage
         /// Returns a new matrix containing the lower triangle of this matrix.
         /// </summary>
         /// <returns>The lower triangle of this matrix.</returns>
-        public virtual DenseColumnMajorStorage<T> LowerTriangle()
+        public virtual DenseColumnMajorStorage<T, Scalar> LowerTriangle()
         {
             var result = Create(RowCount, ColumnCount);
 
@@ -276,7 +298,7 @@ namespace CSparse.Storage
         /// <param name="result">Where to store the lower triangle.</param>
         /// <exception cref="ArgumentNullException">If <paramref name="result"/> is <see langword="null" />.</exception>
         /// <exception cref="ArgumentException">If the result matrix's dimensions are not the same as this matrix.</exception>
-        public virtual void LowerTriangle(DenseColumnMajorStorage<T> result)
+        public virtual void LowerTriangle(DenseColumnMajorStorage<T, Scalar> result)
         {
             if (result == null)
             {
@@ -303,7 +325,7 @@ namespace CSparse.Storage
         /// <param name="result">Where to store the lower triangle.</param>
         /// <exception cref="ArgumentNullException">If <paramref name="result"/> is <see langword="null" />.</exception>
         /// <exception cref="ArgumentException">If the result matrix's dimensions are not the same as this matrix.</exception>
-        public virtual void UpperTriangle(DenseColumnMajorStorage<T> result)
+        public virtual void UpperTriangle(DenseColumnMajorStorage<T, Scalar> result)
         {
             if (result == null)
             {
@@ -331,9 +353,9 @@ namespace CSparse.Storage
         /// <param name="rowCount">The number of rows to copy. Must be positive.</param>
         /// <param name="columnIndex">The column to start copying to.</param>
         /// <param name="columnCount">The number of columns to copy. Must be positive.</param>
-        public DenseColumnMajorStorage<T> SubMatrix(int rowIndex, int rowCount, int columnIndex, int columnCount)
+        public DenseColumnMajorStorage<T, Scalar> SubMatrix(int rowIndex, int rowCount, int columnIndex, int columnCount)
         {
-            var result = DenseColumnMajorStorage<T>.Create(rowCount, columnCount);
+            var result = DenseColumnMajorStorage<T, Scalar>.Create(rowCount, columnCount);
 
             CopySubMatrixTo(result, rowIndex, 0, rowCount, columnIndex, 0, columnCount);
 
@@ -346,7 +368,7 @@ namespace CSparse.Storage
         /// <param name="rowIndex">The row to start copying to.</param>
         /// <param name="columnIndex">The column to start copying to.</param>
         /// <param name="subMatrix">The sub-matrix to copy from.</param>
-        public void SetSubMatrix(int rowIndex, int columnIndex, DenseColumnMajorStorage<T> subMatrix)
+        public void SetSubMatrix(int rowIndex, int columnIndex, DenseColumnMajorStorage<T, Scalar> subMatrix)
         {
             subMatrix.CopySubMatrixTo(this, 0, rowIndex, subMatrix.RowCount, 0, columnIndex, subMatrix.ColumnCount);
         }
@@ -359,7 +381,7 @@ namespace CSparse.Storage
         /// <param name="columnIndex">The column to start copying to.</param>
         /// <param name="columnCount">The number of columns to copy. Must be positive.</param>
         /// <param name="subMatrix">The sub-matrix to copy from.</param>
-        public void SetSubMatrix(int rowIndex, int rowCount, int columnIndex, int columnCount, DenseColumnMajorStorage<T> subMatrix)
+        public void SetSubMatrix(int rowIndex, int rowCount, int columnIndex, int columnCount, DenseColumnMajorStorage<T, Scalar> subMatrix)
         {
             subMatrix.CopySubMatrixTo(this, 0, rowIndex, rowCount, 0, columnIndex, columnCount);
         }
@@ -382,7 +404,7 @@ namespace CSparse.Storage
             }
         }
 
-        private void CopySubMatrixTo(DenseColumnMajorStorage<T> target,
+        private void CopySubMatrixTo(DenseColumnMajorStorage<T, Scalar> target,
             int sourceRowIndex, int targetRowIndex, int rowCount,
             int sourceColumnIndex, int targetColumnIndex, int columnCount)
         {
@@ -411,18 +433,24 @@ namespace CSparse.Storage
 
         #region Internal methods
 
-        internal static DenseColumnMajorStorage<T> Create(int rowCount, int columnCount)
+        internal static DenseColumnMajorStorage<T, Scalar> Create(int rowCount, int columnCount)
         {
             if (typeof(T) == typeof(double))
             {
                 return new CSparse.Double.DenseMatrix(rowCount, columnCount)
-                    as DenseColumnMajorStorage<T>;
+                    as DenseColumnMajorStorage<T, Scalar>;
             }
 
             if (typeof(T) == typeof(Complex))
             {
                 return new CSparse.Complex.DenseMatrix(rowCount, columnCount)
-                    as DenseColumnMajorStorage<T>;
+                    as DenseColumnMajorStorage<T, Scalar>;
+            }
+
+            if (typeof(T) == typeof(float))
+            {
+                return new CSparse.Single.DenseMatrix(rowCount, columnCount)
+                    as DenseColumnMajorStorage<T, Scalar>;
             }
 
             throw new NotSupportedException();

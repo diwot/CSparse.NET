@@ -8,7 +8,7 @@ namespace CSparse.Tests.Double
 
     class DenseTestDataReader
     {
-        public static DenseTestData<double> Read(Stream stream)
+        public static DenseTestData<double, double> Read(Stream stream)
         {
             using (var reader = new StreamReader(stream))
             {
@@ -106,11 +106,11 @@ namespace CSparse.Tests.Double
             value = line.Substring(i + 1).Trim();
         }
 
-        private static DenseTestData<double> ReadSize(string line)
+        private static DenseTestData<double, double> ReadSize(string line)
         {
             var size = line.Split();
 
-            return new DenseTestData<double>()
+            return new DenseTestData<double, double>()
             {
                 RowCount = int.Parse(size[0]),
                 ColumnCount = int.Parse(size[1])

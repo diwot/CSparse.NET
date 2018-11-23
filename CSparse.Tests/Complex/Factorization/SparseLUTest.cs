@@ -14,7 +14,7 @@ namespace CSparse.Tests.Complex.Factorization
         public void TestSolve()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<Complex>("general-40x40.mat");
+            var A = ResourceLoader.Get<Complex, double>("general-40x40.mat");
 
             // Create test data.
             var x = Helper.CreateTestVector(A.ColumnCount);
@@ -37,7 +37,7 @@ namespace CSparse.Tests.Complex.Factorization
         public void TestSolveTranspose()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<Complex>("general-40x40.mat");
+            var A = ResourceLoader.Get<Complex, double>("general-40x40.mat");
 
             var AT = A.Transpose();
 

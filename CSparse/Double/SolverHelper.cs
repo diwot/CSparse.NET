@@ -7,6 +7,7 @@
 
 namespace CSparse.Double
 {
+    using Real = System.Double;
     using CSparse.Storage;
 
     public static class SolverHelper
@@ -17,7 +18,7 @@ namespace CSparse.Double
         /// <param name="L"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        public static void SolveLower(CompressedColumnStorage<double> L, double[] x)
+        public static void SolveLower(CompressedColumnStorage<Real, Real> L, Real[] x)
         {
             int p, j, k, n = L.ColumnCount;
 
@@ -44,7 +45,7 @@ namespace CSparse.Double
         /// <param name="L"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        public static void SolveLowerTranspose(CompressedColumnStorage<double> L, double[] x)
+        public static void SolveLowerTranspose(CompressedColumnStorage<Real, Real> L, Real[] x)
         {
             int p, j, k, n = L.ColumnCount;
 
@@ -71,7 +72,7 @@ namespace CSparse.Double
         /// <param name="U"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        public static void SolveUpper(CompressedColumnStorage<double> U, double[] x)
+        public static void SolveUpper(CompressedColumnStorage<Real, Real> U, Real[] x)
         {
             int p, j, k, n = U.ColumnCount;
 
@@ -98,7 +99,7 @@ namespace CSparse.Double
         /// <param name="U"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        public static void SolveUpperTranspose(CompressedColumnStorage<double> U, double[] x)
+        public static void SolveUpperTranspose(CompressedColumnStorage<Real, Real> U, Real[] x)
         {
             int p, j, k, n = U.ColumnCount;
 

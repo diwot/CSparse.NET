@@ -7,6 +7,7 @@
 
 namespace CSparse.Double.Factorization
 {
+    using Real = System.Double;
     using CSparse.Factorization;
     using CSparse.Ordering;
     using CSparse.Properties;
@@ -20,16 +21,16 @@ namespace CSparse.Double.Factorization
     /// See Chapter 6 (LU factorization) in "Direct Methods for Sparse Linear Systems"
     /// by Tim Davis.
     /// </remarks>
-    public class SparseLU : ISparseFactorization<double>
+    public class SparseLU : ISparseFactorization<Real>
     {
         readonly int n;
 
         SymbolicFactorization S;
-        CompressedColumnStorage<double> L, U;
+        CompressedColumnStorage<Real, Real> L, U;
         int[] pinv; // partial pivoting
 
-        double[] temp; // workspace
-        
+        Real[] temp; // workspace
+
         #region Static methods
 
         /// <summary>
@@ -38,8 +39,8 @@ namespace CSparse.Double.Factorization
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="order">Ordering method to use (natural or A+A').</param>
         /// <param name="tol">Partial pivoting tolerance (form 0.0 to 1.0).</param>
-        public static SparseLU Create(CompressedColumnStorage<double> A, ColumnOrdering order,
-            double tol)
+        public static SparseLU Create(CompressedColumnStorage<Real, Real> A, ColumnOrdering order,
+            Real tol)
         {
             return Create(A, order, tol, null);
         }
@@ -51,8 +52,8 @@ namespace CSparse.Double.Factorization
         /// <param name="order">Ordering method to use (natural or A+A').</param>
         /// <param name="tol">Partial pivoting tolerance (form 0.0 to 1.0).</param>
         /// <param name="progress">Report progress (range from 0.0 to 1.0).</param>
-        public static SparseLU Create(CompressedColumnStorage<double> A, ColumnOrdering order,
-            double tol, IProgress<double> progress)
+        public static SparseLU Create(CompressedColumnStorage<Real, Real> A, ColumnOrdering order,
+            Real tol, IProgress<Real> progress)
         {
             return Create(A, AMD.Generate(A, order), tol, progress);
         }
@@ -63,7 +64,7 @@ namespace CSparse.Double.Factorization
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="p">Permutation.</param>
         /// <param name="tol">Partial pivoting tolerance (form 0.0 to 1.0).</param>
-        public static SparseLU Create(CompressedColumnStorage<double> A, int[] p, double tol)
+        public static SparseLU Create(CompressedColumnStorage<Real, Real> A, int[] p, Real tol)
         {
             return Create(A, p, tol, null);
         }
@@ -75,8 +76,8 @@ namespace CSparse.Double.Factorization
         /// <param name="p">Permutation.</param>
         /// <param name="tol">Partial pivoting tolerance (form 0.0 to 1.0).</param>
         /// <param name="progress">Report progress (range from 0.0 to 1.0).</param>
-        public static SparseLU Create(CompressedColumnStorage<double> A, int[] p, double tol,
-            IProgress<double> progress)
+        public static SparseLU Create(CompressedColumnStorage<Real, Real> A, int[] p, Real tol,
+            IProgress<Real> progress)
         {
             Check.NotNull(A, "A");
             Check.NotNull(p, "p");
@@ -88,7 +89,7 @@ namespace CSparse.Double.Factorization
             Check.NotNaN(tol, "tol");
 
             // Ensure tol is in range.
-            tol = Math.Min(Math.Max(tol, 0.0), 1.0);
+            tol = Math.Min(Math.Max(tol, (Real)0.0), (Real)1.0);
 
             var C = new SparseLU(n);
 
@@ -106,7 +107,7 @@ namespace CSparse.Double.Factorization
         private SparseLU(int n)
         {
             this.n = n;
-            this.temp = new double[n];
+            this.temp = new Real[n];
         }
 
         /// <summary>
@@ -122,7 +123,7 @@ namespace CSparse.Double.Factorization
         /// </summary>
         /// <param name="input">The right hand side vector, <c>b</c>.</param>
         /// <param name="result">The left hand side vector, <c>x</c>.</param>
-        public void Solve(double[] input, double[] result)
+        public void Solve(Real[] input, Real[] result)
         {
             if (input == null) throw new ArgumentNullException("input");
 
@@ -144,7 +145,7 @@ namespace CSparse.Double.Factorization
         /// </summary>
         /// <param name="input">The right hand side vector, <c>b</c>.</param>
         /// <param name="result">The left hand side vector, <c>x</c>.</param>
-        public void SolveTranspose(double[] input, double[] result)
+        public void SolveTranspose(Real[] input, Real[] result)
         {
             if (input == null) throw new ArgumentNullException("input");
 
@@ -164,7 +165,7 @@ namespace CSparse.Double.Factorization
         /// <summary>
         /// [L,U,pinv] = lu(A, [q lnz unz]). lnz and unz can be guess.
         /// </summary>
-        private void Factorize(CompressedColumnStorage<double> A, double tol, IProgress<double> progress)
+        private void Factorize(CompressedColumnStorage<Real, Real> A, Real tol, IProgress<Real> progress)
         {
             int[] q = S.q;
 
@@ -172,8 +173,8 @@ namespace CSparse.Double.Factorization
             int lnz = S.lnz;
             int unz = S.unz;
 
-            this.L = CompressedColumnStorage<double>.Create(n, n, lnz);
-            this.U = CompressedColumnStorage<double>.Create(n, n, unz);
+            this.L = CompressedColumnStorage<Real, Real>.Create(n, n, lnz);
+            this.U = CompressedColumnStorage<Real, Real>.Create(n, n, unz);
             this.pinv = new int[n];
 
             // Workspace
@@ -189,16 +190,18 @@ namespace CSparse.Double.Factorization
             lnz = unz = 0;
 
             int ipiv, top, p, col;
-            double pivot;
-            double a, t;
+            Real pivot;
+            Real a, t;
 
             int[] li, ui;
             int[] lp = L.ColumnPointers;
             int[] up = U.ColumnPointers;
-            double[] lx, ux;
+            Real[] lx, ux;
 
-            double current = 0.0;
-            double step = n / 100.0;
+            Real current = (Real)0.0;
+            Real step = n / (Real)100.0;
+
+            const Real zero = (Real)0.0;
 
             // Now compute L(:,k) and U(:,k)
             for (int k = 0; k < n; k++)
@@ -210,7 +213,7 @@ namespace CSparse.Double.Factorization
 
                     if (progress != null)
                     {
-                        progress.Report(k / (double)n);
+                        progress.Report(k / (Real)n);
                     }
                 }
 
@@ -265,7 +268,7 @@ namespace CSparse.Double.Factorization
                 ux[unz++] = pivot;
                 pinv[ipiv] = k; // ipiv is the kth pivot row
                 li[lnz] = ipiv; // first entry in L(:,k) is L(k,k) = 1
-                lx[lnz++] = 1.0;
+                lx[lnz++] = (Real)1.0;
                 for (p = top; p < n; p++) // L(k+1:n,k) = x / pivot
                 {
                     i = xi[p];
@@ -274,7 +277,7 @@ namespace CSparse.Double.Factorization
                         li[lnz] = i; // save unpermuted row in L
                         lx[lnz++] = x[i] / pivot; // scale pivot column
                     }
-                    x[i] = 0.0; // x [0..n-1] = 0 for next k
+                    x[i] = zero; // x [0..n-1] = 0 for next k
                 }
             }
 
@@ -297,13 +300,13 @@ namespace CSparse.Double.Factorization
         /// </summary>
         /// <param name="A"></param>
         /// <param name="p">Permutation.</param>
-        private void SymbolicAnalysis(CompressedColumnStorage<double> A, int[] p)
+        private void SymbolicAnalysis(CompressedColumnStorage<Real, Real> A, int[] p)
         {
             var sym = this.S = new SymbolicFactorization();
 
             // Fill-reducing ordering
             sym.q = p;
-            
+
             // Guess nnz(L) and nnz(U)
             sym.unz = sym.lnz = 4 * (A.ColumnPointers[n]) + n;
         }
@@ -320,8 +323,8 @@ namespace CSparse.Double.Factorization
         /// <param name="pinv">mapping of rows to columns of G, ignored if null</param>
         /// <param name="lo">true if lower triangular, false if upper</param>
         /// <returns>top, -1 in error</returns>
-        private int SolveSp(CompressedColumnStorage<double> G, CompressedColumnStorage<double> B,
-            int k, int[] xi, double[] x, int[] pinv, bool lo)
+        private int SolveSp(CompressedColumnStorage<Real, Real> G, CompressedColumnStorage<Real, Real> B,
+            int k, int[] xi, Real[] x, int[] pinv, bool lo)
         {
             if (xi == null || x == null) return -1;
 

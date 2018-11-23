@@ -20,7 +20,7 @@ namespace CSparse
         /// <param name="storage">Coordinate storage.</param>
         /// <param name="cleanup">Remove and sum duplicate entries.</param>
         /// <returns>Compressed sparse column storage.</returns>
-        public static CompressedColumnStorage<T> ToCompressedColumnStorage<T>(CoordinateStorage<T> storage,
+        public static CompressedColumnStorage<T, Scalar> ToCompressedColumnStorage<T, Scalar>(CoordinateStorage<T> storage,
             bool cleanup = true) where T : struct, IEquatable<T>, IFormattable
         {
             int nrows = storage.RowCount;
@@ -44,7 +44,7 @@ namespace CSparse
             // Get row pointers
             int valueCount = Helper.CumulativeSum(columnPointers, columnCounts, ncols);
 
-            var result = CompressedColumnStorage<T>.Create(nrows, ncols);
+            var result = CompressedColumnStorage<T, Scalar>.Create(nrows, ncols);
 
             var rowIndices = new int[valueCount];
             var storageValues = new T[valueCount];
@@ -99,7 +99,7 @@ namespace CSparse
         /// </summary>
         /// <param name="array">Jagged array storage.</param>
         /// <returns>Compressed sparse column storage.</returns>
-        public static CompressedColumnStorage<T> ToCompressedColumnStorage<T>(T[][] array)
+        public static CompressedColumnStorage<T, Scalar> ToCompressedColumnStorage<T, Scalar>(T[][] array)
             where T : struct, IEquatable<T>, IFormattable
         {
             int nrows = array.Length;
@@ -115,7 +115,7 @@ namespace CSparse
                 }
             }
 
-            return ToCompressedColumnStorage<T>(storage, false);
+            return ToCompressedColumnStorage<T, Scalar>(storage, false);
         }
 
 

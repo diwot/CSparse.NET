@@ -26,7 +26,7 @@ namespace CSparse.Complex.Factorization
         readonly int n;
 
         SymbolicFactorization S;
-        CompressedColumnStorage<Complex> L, U;
+        CompressedColumnStorage<Complex, double> L, U;
         int[] pinv; // partial pivoting
 
         Complex[] temp; // workspace
@@ -39,7 +39,7 @@ namespace CSparse.Complex.Factorization
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="order">Ordering method to use (natural or A+A').</param>
         /// <param name="tol">Partial pivoting tolerance (form 0.0 to 1.0).</param>
-        public static SparseLU Create(CompressedColumnStorage<Complex> A, ColumnOrdering order,
+        public static SparseLU Create(CompressedColumnStorage<Complex, double> A, ColumnOrdering order,
             double tol)
         {
             return Create(A, order, tol, null);
@@ -52,7 +52,7 @@ namespace CSparse.Complex.Factorization
         /// <param name="order">Ordering method to use (natural or A+A').</param>
         /// <param name="tol">Partial pivoting tolerance (form 0.0 to 1.0).</param>
         /// <param name="progress">Report progress (range from 0.0 to 1.0).</param>
-        public static SparseLU Create(CompressedColumnStorage<Complex> A, ColumnOrdering order,
+        public static SparseLU Create(CompressedColumnStorage<Complex, double> A, ColumnOrdering order,
             double tol, IProgress<double> progress)
         {
             return Create(A, AMD.Generate(A, order), tol, progress);
@@ -64,7 +64,7 @@ namespace CSparse.Complex.Factorization
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="p">Permutation.</param>
         /// <param name="tol">Partial pivoting tolerance (form 0.0 to 1.0).</param>
-        public static SparseLU Create(CompressedColumnStorage<Complex> A, int[] p, double tol)
+        public static SparseLU Create(CompressedColumnStorage<Complex, double> A, int[] p, double tol)
         {
             return Create(A, p, tol, null);
         }
@@ -76,7 +76,7 @@ namespace CSparse.Complex.Factorization
         /// <param name="p">Permutation.</param>
         /// <param name="tol">Partial pivoting tolerance (form 0.0 to 1.0).</param>
         /// <param name="progress">Report progress (range from 0.0 to 1.0).</param>
-        public static SparseLU Create(CompressedColumnStorage<Complex> A, int[] p, double tol,
+        public static SparseLU Create(CompressedColumnStorage<Complex, double> A, int[] p, double tol,
             IProgress<double> progress)
         {
             Check.NotNull(A, "A");
@@ -165,7 +165,7 @@ namespace CSparse.Complex.Factorization
         /// <summary>
         /// [L,U,pinv] = lu(A, [q lnz unz]). lnz and unz can be guess.
         /// </summary>
-        private void Factorize(CompressedColumnStorage<Complex> A, double tol, IProgress<double> progress)
+        private void Factorize(CompressedColumnStorage<Complex, double> A, double tol, IProgress<double> progress)
         {
             int[] q = S.q;
 
@@ -173,8 +173,8 @@ namespace CSparse.Complex.Factorization
             int lnz = S.lnz;
             int unz = S.unz;
 
-            this.L = CompressedColumnStorage<Complex>.Create(n, n, lnz);
-            this.U = CompressedColumnStorage<Complex>.Create(n, n, unz);
+            this.L = CompressedColumnStorage<Complex, double>.Create(n, n, lnz);
+            this.U = CompressedColumnStorage<Complex, double>.Create(n, n, unz);
             this.pinv = new int[n];
 
             // Workspace
@@ -298,7 +298,7 @@ namespace CSparse.Complex.Factorization
         /// </summary>
         /// <param name="A"></param>
         /// <param name="p">Permutation.</param>
-        private void SymbolicAnalysis(CompressedColumnStorage<Complex> A, int[] p)
+        private void SymbolicAnalysis(CompressedColumnStorage<Complex, double> A, int[] p)
         {
             var sym = this.S = new SymbolicFactorization();
 
@@ -321,7 +321,7 @@ namespace CSparse.Complex.Factorization
         /// <param name="pinv">mapping of rows to columns of G, ignored if null</param>
         /// <param name="lo">true if lower triangular, false if upper</param>
         /// <returns>top, -1 in error</returns>
-        private int SolveSp(CompressedColumnStorage<Complex> G, CompressedColumnStorage<Complex> B,
+        private int SolveSp(CompressedColumnStorage<Complex, double> G, CompressedColumnStorage<Complex, double> B,
             int k, int[] xi, Complex[] x, int[] pinv, bool lo)
         {
             if (xi == null || x == null) return -1;

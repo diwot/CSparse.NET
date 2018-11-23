@@ -23,7 +23,7 @@ namespace CSparse
             }
         }
 
-        public static void SquareMatrix<T>(CompressedColumnStorage<T> A, string name)
+        public static void SquareMatrix<T, Scalar>(CompressedColumnStorage<T, Scalar> A, string name)
             where T : struct, IEquatable<T>, IFormattable
         {
             if (A.RowCount != A.ColumnCount)

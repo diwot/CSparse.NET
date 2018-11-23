@@ -1,6 +1,7 @@
 ﻿
 namespace CSparse.Double
 {
+    using Real = System.Double;
     using CSparse.Properties;
     using CSparse.Storage;
     using System;
@@ -11,32 +12,32 @@ namespace CSparse.Double
     /// </summary>
     [DebuggerDisplay("DenseMatrix {RowCount}x{ColumnCount}")]
     [Serializable]
-    public class DenseMatrix : DenseColumnMajorStorage<Double>
+    public class DenseMatrix : DenseColumnMajorStorage<Real, Real>
     {
         /// <summary>
         /// Initializes a new instance of the DenseMatrix class.
         /// </summary>
         public DenseMatrix(int rows, int columns)
-            : this(rows, columns, new double[rows * columns])
+            : this(rows, columns, new Real[rows * columns])
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the DenseMatrix class.
         /// </summary>
-        public DenseMatrix(int rows, int columns, double[] values)
+        public DenseMatrix(int rows, int columns, Real[] values)
             : base(rows, columns, values)
         {
         }
 
         /// <inheritdoc />
-        public override double L1Norm()
+        public override Real L1Norm()
         {
-            double sum, norm = 0.0;
+            Real sum, norm = (Real)0.0;
 
             for (var j = 0; j < columnCount; j++)
             {
-                sum = 0.0;
+                sum = (Real)0.0;
                 for (var i = 0; i < rowCount; i++)
                 {
                     sum += Math.Abs(Values[(j * rowCount) + i]);
@@ -46,11 +47,11 @@ namespace CSparse.Double
 
             return norm;
         }
-        
+
         /// <inheritdoc />
-        public override double InfinityNorm()
+        public override Real InfinityNorm()
         {
-            var r = new double[rowCount];
+            var r = new Real[rowCount];
 
             for (var j = 0; j < columnCount; j++)
             {
@@ -60,7 +61,7 @@ namespace CSparse.Double
                 }
             }
 
-            double norm = r[0];
+            Real norm = r[0];
 
             for (int i = 1; i < rowCount; i++)
             {
@@ -74,9 +75,9 @@ namespace CSparse.Double
         }
 
         /// <inheritdoc />
-        public override double FrobeniusNorm()
+        public override Real FrobeniusNorm()
         {
-            double sum = 0.0, norm = 0.0;
+            Real sum = (Real)0.0, norm = (Real)0.0;
 
             int length = rowCount * columnCount;
 
@@ -86,19 +87,19 @@ namespace CSparse.Double
                 norm += sum * sum;
             }
 
-            return Math.Sqrt(norm);
+            return (Real)Math.Sqrt(norm);
         }
 
         /// <inheritdoc />
-        public override DenseColumnMajorStorage<double> Clone()
+        public override DenseColumnMajorStorage<Real, Real> Clone()
         {
-            var values = (double[])this.Values.Clone();
+            var values = (Real[])this.Values.Clone();
 
             return new DenseMatrix(rowCount, columnCount, values);
         }
 
         /// <inheritdoc />
-        public override void Multiply(double[] x, double[] y)
+        public override void Multiply(Real[] x, Real[] y)
         {
             var A = Values;
 
@@ -107,7 +108,7 @@ namespace CSparse.Double
 
             for (int i = 0; i < rows; i++)
             {
-                double sum = 0.0;
+                Real sum = (Real)0.0;
 
                 for (int j = 0; j < cols; j++)
                 {
@@ -119,7 +120,7 @@ namespace CSparse.Double
         }
 
         /// <inheritdoc />
-        public override void Multiply(double alpha, double[] x, double beta, double[] y)
+        public override void Multiply(Real alpha, Real[] x, Real beta, Real[] y)
         {
             var A = Values;
 
@@ -128,7 +129,7 @@ namespace CSparse.Double
 
             for (int i = 0; i < rows; i++)
             {
-                double sum = 0.0;
+                Real sum = (Real)0.0;
 
                 for (int j = 0; j < cols; j++)
                 {
@@ -140,18 +141,18 @@ namespace CSparse.Double
         }
 
         /// <inheritdoc />
-        public override void TransposeMultiply(double[] x, double[] y)
+        public override void TransposeMultiply(Real[] x, Real[] y)
         {
             var A = Values;
 
             int rows = rowCount;
             int cols = columnCount;
-            
+
             for (int j = 0; j < cols; j++)
             {
                 int col = j * rows;
 
-                double sum = 0.0;
+                Real sum = (Real)0.0;
 
                 for (int i = 0; i < rows; i++)
                 {
@@ -163,7 +164,7 @@ namespace CSparse.Double
         }
 
         /// <inheritdoc />
-        public override void TransposeMultiply(double alpha, double[] x, double beta, double[] y)
+        public override void TransposeMultiply(Real alpha, Real[] x, Real beta, Real[] y)
         {
             var A = Values;
 
@@ -174,24 +175,24 @@ namespace CSparse.Double
             {
                 y[j] = beta * y[j];
             }
-            
+
             for (int j = 0; j < cols; j++)
             {
                 int col = j * rows;
 
-                double sum = 0.0;
+                Real sum = (Real)0.0;
 
                 for (int i = 0; i < rows; i++)
                 {
                     sum += A[col + i] * x[i];
                 }
 
-                y[j] = beta * y[j] +  alpha * sum;
+                y[j] = beta * y[j] + alpha * sum;
             }
         }
 
         /// <inheritdoc />
-        public override void Add(DenseColumnMajorStorage<double> other, DenseColumnMajorStorage<double> result)
+        public override void Add(DenseColumnMajorStorage<Real, Real> other, DenseColumnMajorStorage<Real, Real> result)
         {
             int rows = this.rowCount;
             int columns = this.columnCount;
@@ -216,7 +217,7 @@ namespace CSparse.Double
         }
 
         /// <inheritdoc />
-        public override void Multiply(DenseColumnMajorStorage<double> other, DenseColumnMajorStorage<double> result)
+        public override void Multiply(DenseColumnMajorStorage<Real, Real> other, DenseColumnMajorStorage<Real, Real> result)
         {
             var A = Values;
             var B = other.Values;
@@ -226,11 +227,13 @@ namespace CSparse.Double
             int n = other.ColumnCount;
             int o = columnCount;
 
+            const Real zero = (Real)0.0;
+
             for (int i = 0; i < m; i++)
             {
                 for (int j = 0; j < n; j++)
                 {
-                    double sum = 0.0;
+                    Real sum = zero;
 
                     for (int k = 0; k < o; ++k)
                     {
@@ -243,7 +246,7 @@ namespace CSparse.Double
         }
 
         /// <inheritdoc />
-        public override void PointwiseMultiply(DenseColumnMajorStorage<double> other, DenseColumnMajorStorage<double> result)
+        public override void PointwiseMultiply(DenseColumnMajorStorage<Real, Real> other, DenseColumnMajorStorage<Real, Real> result)
         {
             if (RowCount != other.RowCount || ColumnCount != other.ColumnCount)
             {
@@ -269,14 +272,14 @@ namespace CSparse.Double
         }
 
         /// <inheritdoc />
-        public override bool Equals(Matrix<double> other, double tolerance)
+        public override bool Equals(Matrix<Real, Real> other, Real tolerance)
         {
             if (rowCount != other.RowCount || columnCount != other.ColumnCount)
             {
                 return false;
             }
 
-            var dense = other as DenseColumnMajorStorage<double>;
+            var dense = other as DenseColumnMajorStorage<Real, Real>;
 
             if (dense == null)
             {

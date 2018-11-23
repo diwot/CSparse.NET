@@ -18,7 +18,7 @@ namespace CSparse.Complex
         /// <param name="L"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        public static void SolveLower(CompressedColumnStorage<Complex> L, Complex[] x)
+        public static void SolveLower(CompressedColumnStorage<Complex, double> L, Complex[] x)
         {
             int p, j, k, n = L.ColumnCount;
 
@@ -45,7 +45,7 @@ namespace CSparse.Complex
         /// <param name="L"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        public static void SolveLowerTranspose(CompressedColumnStorage<Complex> L, Complex[] x)
+        public static void SolveLowerTranspose(CompressedColumnStorage<Complex, double> L, Complex[] x)
         {
             int p, j, k, n = L.ColumnCount;
 
@@ -72,7 +72,7 @@ namespace CSparse.Complex
         /// <param name="U"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        public static void SolveUpper(CompressedColumnStorage<Complex> U, Complex[] x)
+        public static void SolveUpper(CompressedColumnStorage<Complex, double> U, Complex[] x)
         {
             int p, j, k, n = U.ColumnCount;
 
@@ -99,7 +99,7 @@ namespace CSparse.Complex
         /// <param name="U"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        public static void SolveUpperTranspose(CompressedColumnStorage<Complex> U, Complex[] x)
+        public static void SolveUpperTranspose(CompressedColumnStorage<Complex, double> U, Complex[] x)
         {
             int p, j, k, n = U.ColumnCount;
 

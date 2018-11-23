@@ -17,7 +17,7 @@ namespace CSparse.Storage
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Serializable]
-    public abstract class CompressedColumnStorage<T> : Matrix<T>
+    public abstract class CompressedColumnStorage<T, Scalar> : Matrix<T, Scalar>
         where T : struct, IEquatable<T>, IFormattable
     {
         /// <summary>
@@ -175,7 +175,7 @@ namespace CSparse.Storage
         /// <summary>
         /// Returns the transpose of this matrix.
         /// </summary>
-        public CompressedColumnStorage<T> Transpose()
+        public CompressedColumnStorage<T, Scalar> Transpose()
         {
             return this.Transpose(false);
         }
@@ -184,7 +184,7 @@ namespace CSparse.Storage
         /// Transpose this matrix and store the result in given matrix.
         /// </summary>
         /// <param name="result">Storage for the tranposed matrix.</param>
-        public void Transpose(CompressedColumnStorage<T> result)
+        public void Transpose(CompressedColumnStorage<T, Scalar> result)
         {
             this.Transpose(result, false);
         }
@@ -193,9 +193,9 @@ namespace CSparse.Storage
         /// Returns the transpose of this matrix.
         /// </summary>
         /// <param name="storage">A value indicating, whether the transpose should be done on storage level (without complex conjugation).</param>
-        public CompressedColumnStorage<T> Transpose(bool storage)
+        public CompressedColumnStorage<T, Scalar> Transpose(bool storage)
         {
-            var result = CompressedColumnStorage<T>.Create(columnCount, rowCount, this.NonZerosCount);
+            var result = CompressedColumnStorage<T, Scalar>.Create(columnCount, rowCount, this.NonZerosCount);
             this.Transpose(result, storage);
             return result;
         }
@@ -205,7 +205,7 @@ namespace CSparse.Storage
         /// </summary>
         /// <param name="result">Storage for the tranposed matrix.</param>
         /// <param name="storage">A value indicating, whether the transpose should be done on storage level (without complex conjugation).</param>
-        public virtual void Transpose(CompressedColumnStorage<T> result, bool storage)
+        public virtual void Transpose(CompressedColumnStorage<T, Scalar> result, bool storage)
         {
             int i, j, p;
 
@@ -240,7 +240,7 @@ namespace CSparse.Storage
         /// <summary>
         /// Adds two matrices in CSC format, C = A + B, where A is current instance.
         /// </summary>
-        public CompressedColumnStorage<T> Add(CompressedColumnStorage<T> other)
+        public CompressedColumnStorage<T, Scalar> Add(CompressedColumnStorage<T, Scalar> other)
         {
             int m = this.rowCount;
             int n = this.columnCount;
@@ -251,7 +251,7 @@ namespace CSparse.Storage
                 throw new ArgumentException(Resources.MatrixDimensions);
             }
 
-            var result = CompressedColumnStorage<T>.Create(m, n, this.NonZerosCount + other.NonZerosCount);
+            var result = CompressedColumnStorage<T, Scalar>.Create(m, n, this.NonZerosCount + other.NonZerosCount);
 
             var one = Helper.OneOf<T>();
 
@@ -272,15 +272,15 @@ namespace CSparse.Storage
         /// the nonzero entries of the sum. An upper bound is the sum of the nonzeros count
         /// of (this) and (other).
         /// </remarks>
-        public abstract void Add(T alpha, T beta, CompressedColumnStorage<T> other,
-            CompressedColumnStorage<T> result);
+        public abstract void Add(T alpha, T beta, CompressedColumnStorage<T, Scalar> other,
+            CompressedColumnStorage<T, Scalar> result);
 
         /// <summary>
         /// Sparse matrix multiplication, C = A*B
         /// </summary>
         /// <param name="other">column-compressed matrix</param>
         /// <returns>C = A*B, null on error</returns>
-        public abstract CompressedColumnStorage<T> Multiply(CompressedColumnStorage<T> other);
+        public abstract CompressedColumnStorage<T, Scalar> Multiply(CompressedColumnStorage<T, Scalar> other);
 
         #endregion
 
@@ -306,13 +306,13 @@ namespace CSparse.Storage
         /// </summary>
         /// <param name="tolerance">Drop tolerance (default is 0.0)</param>
         /// <returns>The new number of nonzero entries.</returns>
-        public abstract int DropZeros(double tolerance = 0.0);
+        public abstract int DropZeros(Scalar tolerance);
 
         /// <summary>
         /// Returns a clone of this matrix.
         /// </summary>
         /// <param name="values">If true (default), the values are copied.</param>
-        public CompressedColumnStorage<T> Clone(bool values = true)
+        public CompressedColumnStorage<T, Scalar> Clone(bool values = true)
         {
             int rows = this.RowCount;
             int columns = this.ColumnCount;
@@ -401,7 +401,7 @@ namespace CSparse.Storage
         /// </summary>
         /// <param name="perm">Permutation matrix P.</param>
         /// <param name="target">The target storage (must be fully initialized to match the source storage).</param>
-        public void PermuteRows(int[] perm, CompressedColumnStorage<T> target)
+        public void PermuteRows(int[] perm, CompressedColumnStorage<T, Scalar> target)
         {
             var bx = target.Values;
             var bp = target.ColumnPointers;
@@ -436,7 +436,7 @@ namespace CSparse.Storage
         /// </summary>
         /// <param name="perm">Permutation matrix P.</param>
         /// <param name="target">The target storage (must be fully initialized to match the source storage).</param>
-        public void PermuteColumns(int[] perm, CompressedColumnStorage<T> target)
+        public void PermuteColumns(int[] perm, CompressedColumnStorage<T, Scalar> target)
         {
             var bx = target.Values;
             var bp = target.ColumnPointers;
@@ -466,7 +466,7 @@ namespace CSparse.Storage
         /// Permute the columns of the matrix.
         /// </summary>
         /// <param name="perm">Permutation matrix P.</param>
-        public CompressedColumnStorage<T> PermuteColumns(int[] perm)
+        public CompressedColumnStorage<T, Scalar> PermuteColumns(int[] perm)
         {
             var result = Create(RowCount, columnCount, Values.Length);
 
@@ -598,35 +598,47 @@ namespace CSparse.Storage
 
         #region Internal methods
 
-        internal static CompressedColumnStorage<T> Create(int rowCount, int columnCount)
+        internal static CompressedColumnStorage<T, Scalar> Create(int rowCount, int columnCount)
         {
             if (typeof(T) == typeof(double))
             {
                 return new CSparse.Double.SparseMatrix(rowCount, columnCount)
-                    as CompressedColumnStorage<T>;
+                    as CompressedColumnStorage<T, Scalar>;
             }
 
             if (typeof(T) == typeof(Complex))
             {
                 return new CSparse.Complex.SparseMatrix(rowCount, columnCount)
-                    as CompressedColumnStorage<T>;
+                    as CompressedColumnStorage<T, Scalar>;
+            }
+
+            if (typeof(T) == typeof(float))
+            {
+                return new CSparse.Single.SparseMatrix(rowCount, columnCount)
+                    as CompressedColumnStorage<T, Scalar>;
             }
 
             throw new NotSupportedException();
         }
 
-        internal static CompressedColumnStorage<T> Create(int rowCount, int columnCount, int valueCount)
+        internal static CompressedColumnStorage<T, Scalar> Create(int rowCount, int columnCount, int valueCount)
         {
             if (typeof(T) == typeof(double))
             {
                 return new CSparse.Double.SparseMatrix(rowCount, columnCount, valueCount)
-                    as CompressedColumnStorage<T>;
+                    as CompressedColumnStorage<T, Scalar>;
             }
 
             if (typeof(T) == typeof(Complex))
             {
                 return new CSparse.Complex.SparseMatrix(rowCount, columnCount, valueCount)
-                    as CompressedColumnStorage<T>;
+                    as CompressedColumnStorage<T, Scalar>;
+            }
+
+            if (typeof(T) == typeof(float))
+            {
+                return new CSparse.Single.SparseMatrix(rowCount, columnCount, valueCount)
+                    as CompressedColumnStorage<T, Scalar>;
             }
 
             throw new NotSupportedException();
@@ -693,7 +705,7 @@ namespace CSparse.Storage
 
         internal abstract void Cleanup();
 
-        internal abstract int Scatter(int j, T beta, int[] w, T[] x, int mark, CompressedColumnStorage<T> mat, int nzz);
+        internal abstract int Scatter(int j, T beta, int[] w, T[] x, int mark, CompressedColumnStorage<T, Scalar> mat, int nzz);
 
         #endregion
 

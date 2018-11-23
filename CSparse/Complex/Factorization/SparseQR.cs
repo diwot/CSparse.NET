@@ -7,7 +7,7 @@
 
 namespace CSparse.Complex.Factorization
 {
-    using CSparse.Factorization;
+    using CSparse.Double.Factorization;
     using CSparse.Ordering;
     using CSparse.Storage;
     using System;
@@ -29,7 +29,7 @@ namespace CSparse.Complex.Factorization
         /// </summary>
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="order">Ordering method to use (natural or A+A').</param>
-        public static SparseQR Create(CompressedColumnStorage<Complex> A, ColumnOrdering order)
+        public static SparseQR Create(CompressedColumnStorage<Complex, double> A, ColumnOrdering order)
         {
             return Create(A, order, null);
         }
@@ -40,7 +40,7 @@ namespace CSparse.Complex.Factorization
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="order">Ordering method to use (natural or A+A').</param>
         /// <param name="progress">Report progress (range from 0.0 to 1.0).</param>
-        public static SparseQR Create(CompressedColumnStorage<Complex> A, ColumnOrdering order,
+        public static SparseQR Create(CompressedColumnStorage<Complex, double> A, ColumnOrdering order,
             IProgress<double> progress)
         {
             Check.NotNull(A, "A");
@@ -177,7 +177,7 @@ namespace CSparse.Complex.Factorization
         /// <summary>
         /// Apply the ith Householder vector to x.
         /// </summary>
-        protected override bool ApplyHouseholder(CompressedColumnStorage<Complex> V, int i, double beta, Complex[] x)
+        protected override bool ApplyHouseholder(CompressedColumnStorage<Complex, double> V, int i, double beta, Complex[] x)
         {
             int p = 0;
             Complex tau = Complex.Zero;

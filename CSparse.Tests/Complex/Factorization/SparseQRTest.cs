@@ -14,7 +14,7 @@ namespace CSparse.Tests.Complex.Factorization
         public void TestSolve()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<Complex>("general-40x40.mat");
+            var A = ResourceLoader.Get<Complex, double>("general-40x40.mat");
 
             Assert.AreEqual(A.RowCount, A.ColumnCount);
 
@@ -37,7 +37,7 @@ namespace CSparse.Tests.Complex.Factorization
         public void TestSolveOverdetermined()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<Complex>("general-40x20.mat");
+            var A = ResourceLoader.Get<Complex, double>("general-40x20.mat");
 
             int m = A.RowCount;
             int n = A.ColumnCount;
@@ -64,7 +64,7 @@ namespace CSparse.Tests.Complex.Factorization
         public void TestSolveUnderdetermined()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<Complex>("general-20x40.mat");
+            var A = ResourceLoader.Get<Complex, double>("general-20x40.mat");
 
             int m = A.RowCount;
             int n = A.ColumnCount;

@@ -58,7 +58,16 @@
     <Compile Include="Double\Vector.cs" />
     <Compile Include="Factorization\ISolver.cs" />
     <Compile Include="Factorization\ISparseFactorization.cs" />
-    <Compile Include="Factorization\SparseQR.cs" />
+    <Compile Include="Double\Factorization\SparseQRBase.cs" />
+    <Compile Include="Single\DenseMatrix.cs" />
+    <Compile Include="Single\Factorization\SparseCholesky.cs" />
+    <Compile Include="Single\Factorization\SparseLDL.cs" />
+    <Compile Include="Single\Factorization\SparseLU.cs" />
+    <Compile Include="Single\Factorization\SparseQR.cs" />
+    <Compile Include="Single\Factorization\SparseQRBase.cs" />
+    <Compile Include="Single\SolverHelper.cs" />
+    <Compile Include="Single\SparseMatrix.cs" />
+    <Compile Include="Single\Vector.cs" />
     <Compile Include="ILinearOperator.cs" />
     <Compile Include="IO\MatrixMarketReader.cs" />
     <Compile Include="IO\MatrixMarketWriter.cs" />
@@ -89,6 +98,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

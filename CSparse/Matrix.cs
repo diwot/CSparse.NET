@@ -14,7 +14,7 @@ namespace CSparse
     /// Abstract base class for matrix implementations.
     /// </summary>
     [Serializable]
-    public abstract class Matrix<T> : ILinearOperator<T>
+    public abstract class Matrix<T, Scalar> : ILinearOperator<T>
         where T : struct, IEquatable<T>, IFormattable
     {
         /// <summary>
@@ -102,19 +102,19 @@ namespace CSparse
         /// Calculates the induced L1 norm of this matrix.
         /// </summary>
         /// <returns>The maximum absolute column sum of the matrix.</returns>
-        public abstract double L1Norm();
+        public abstract Scalar L1Norm();
 
         /// <summary>
         /// Calculates the induced infinity norm of this matrix.
         /// </summary>
         /// <returns>The maximum absolute row sum of the matrix.</returns>
-        public abstract double InfinityNorm();
+        public abstract Scalar InfinityNorm();
 
         /// <summary>
         /// Calculates the entry-wise Frobenius norm of this matrix.
         /// </summary>
         /// <returns>The square root of the sum of the squared values.</returns>
-        public abstract double FrobeniusNorm();
+        public abstract Scalar FrobeniusNorm();
 
         /// <summary>
         /// Enumerates all values of the matrix.
@@ -145,7 +145,7 @@ namespace CSparse
         /// <returns>
         /// <c>true</c> if the current object is equal to the <paramref name="other"/> parameter; otherwise, <c>false</c>.
         /// </returns>
-        public virtual bool Equals(Matrix<T> other)
+        public virtual bool Equals(Matrix<T, Scalar> other)
         {
             // Reject equality when the argument is null or has a different shape.
             if (other == null)
@@ -165,7 +165,7 @@ namespace CSparse
         /// <summary>
         /// Check two matrices for equality.
         /// </summary>
-        public abstract bool Equals(Matrix<T> other, double tolerance);
+        public abstract bool Equals(Matrix<T, Scalar> other, Scalar tolerance);
 
         /// <summary>
         /// Determines whether the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:System.Object"/>.
@@ -176,7 +176,7 @@ namespace CSparse
         /// <param name="obj">The <see cref="T:System.Object"/> to compare with the current <see cref="T:System.Object"/>. </param>
         public override sealed bool Equals(object obj)
         {
-            return Equals(obj as Matrix<T>);
+            return Equals(obj as Matrix<T, Scalar>);
         }
 
         /// <summary>

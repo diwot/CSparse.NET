@@ -6,15 +6,15 @@ namespace CSparse.Tests.Double
 
     class MatrixHelper
     {
-        private static Dictionary<string, DenseTestData<double>> dense = new Dictionary<string, DenseTestData<double>>();
+        private static Dictionary<string, DenseTestData<double, double>> dense = new Dictionary<string, DenseTestData<double, double>>();
 
-        private static Dictionary<string, SparseTestData<double>> sparse = new Dictionary<string, SparseTestData<double>>();
+        private static Dictionary<string, SparseTestData<double, double>> sparse = new Dictionary<string, SparseTestData<double, double>>();
 
-        public static SparseTestData<double> LoadSparse(int rows, int columns)
+        public static SparseTestData<double, double> LoadSparse(int rows, int columns)
         {
             string resource = string.Format("test-data-dense-{0}x{1}.txt", rows, columns);
 
-            SparseTestData<double> data;
+            SparseTestData<double, double> data;
 
             if (!sparse.TryGetValue(resource, out data))
             {
@@ -28,11 +28,11 @@ namespace CSparse.Tests.Double
             return data;
         }
 
-        public static DenseTestData<double> LoadDense(int rows, int columns)
+        public static DenseTestData<double, double> LoadDense(int rows, int columns)
         {
             string resource = string.Format("test-data-dense-{0}x{1}.txt", rows, columns);
 
-            DenseTestData<double> data;
+            DenseTestData<double, double> data;
 
             if (!dense.TryGetValue(resource, out data))
             {
@@ -46,9 +46,9 @@ namespace CSparse.Tests.Double
             return data;
         }
 
-        private static SparseTestData<double> DenseToSparse(DenseTestData<double> dense)
+        private static SparseTestData<double, double> DenseToSparse(DenseTestData<double, double> dense)
         {
-            var data = new SparseTestData<double>()
+            var data = new SparseTestData<double, double>()
             {
                 RowCount = dense.RowCount,
                 ColumnCount = dense.ColumnCount
@@ -70,11 +70,11 @@ namespace CSparse.Tests.Double
             return data;
         }
 
-        private static CompressedColumnStorage<double> DenseToSparse(DenseColumnMajorStorage<double> dense)
+        private static CompressedColumnStorage<double, double> DenseToSparse(DenseColumnMajorStorage<double, double> dense)
         {
             var cs = Converter.FromColumnMajorArray(dense.Values, dense.RowCount, dense.ColumnCount);
 
-            return Converter.ToCompressedColumnStorage(cs);
+            return Converter.ToCompressedColumnStorage<double, double>(cs);
         }
     }
 }

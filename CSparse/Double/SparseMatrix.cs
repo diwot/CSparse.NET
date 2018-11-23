@@ -7,6 +7,7 @@
 
 namespace CSparse.Double
 {
+    using Real = System.Double;
     using CSparse.Properties;
     using CSparse.Storage;
     using System;
@@ -15,7 +16,7 @@ namespace CSparse.Double
     /// <inheritdoc />
     [DebuggerDisplay("SparseMatrix {RowCount}x{ColumnCount}-Double {NonZerosCount}-NonZero")]
     [Serializable]
-    public class SparseMatrix : CompressedColumnStorage<double>
+    public class SparseMatrix : CompressedColumnStorage<Real, Real>
     {
         /// <summary>
         /// Initializes a new instance of the SparseMatrix class.
@@ -36,7 +37,7 @@ namespace CSparse.Double
         /// <summary>
         /// Initializes a new instance of the SparseMatrix class.
         /// </summary>
-        public SparseMatrix(int rowCount, int columnCount, double[] values, int[] rowIndices, int[] columnPointers)
+        public SparseMatrix(int rowCount, int columnCount, Real[] values, int[] rowIndices, int[] columnPointers)
             : base(rowCount, columnCount, values, rowIndices, columnPointers)
         {
         }
@@ -44,9 +45,9 @@ namespace CSparse.Double
         #region Public functions
 
         /// <inheritdoc />
-        public override int DropZeros(double tolerance = 0.0)
+        public override int DropZeros(Real tolerance = (Real)0.0)
         {
-            Func<int, int, double, bool> func;
+            Func<int, int, Real, bool> func;
 
             if (tolerance <= 0.0)
             {
@@ -67,7 +68,7 @@ namespace CSparse.Double
         }
 
         /// <inheritdoc />
-        public override int Keep(Func<int, int, double, bool> func)
+        public override int Keep(Func<int, int, Real, bool> func)
         {
             int i, j, nz = 0;
 
@@ -100,15 +101,15 @@ namespace CSparse.Double
         }
 
         /// <inheritdoc />
-        public override double L1Norm()
+        public override Real L1Norm()
         {
             int nz = this.NonZerosCount;
 
-            double sum, norm = 0.0;
+            Real sum, norm = (Real)0.0;
 
             for (int j = 0; j < columnCount; j++)
             {
-                sum = 0.0;
+                sum = (Real)0.0;
                 for (int i = ColumnPointers[j]; i < ColumnPointers[j + 1]; i++)
                 {
                     sum += Math.Abs(Values[i]);
@@ -120,13 +121,13 @@ namespace CSparse.Double
         }
         
         /// <inheritdoc />
-        public override double InfinityNorm()
+        public override Real InfinityNorm()
         {
             int nz = this.NonZerosCount;
 
-            double norm = 0.0;
+            Real norm = (Real)0.0;
 
-            var work = new double[rowCount];
+            var work = new Real[rowCount];
 
             for (int j = 0; j < columnCount; j++)
             {
@@ -145,11 +146,11 @@ namespace CSparse.Double
         }
 
         /// <inheritdoc />
-        public override double FrobeniusNorm()
+        public override Real FrobeniusNorm()
         {
             int nz = this.NonZerosCount;
 
-            double sum = 0.0, norm = 0.0;
+            Real sum = (Real)0.0, norm = (Real)0.0;
             
             for (int i = 0; i < nz; i++)
             {
@@ -157,7 +158,7 @@ namespace CSparse.Double
                 norm += sum * sum;
             }
 
-            return Math.Sqrt(norm);
+            return (Real)Math.Sqrt(norm);
         }
 
         #endregion
@@ -169,16 +170,18 @@ namespace CSparse.Double
         /// </summary>
         /// <param name="x">Vector of length n (column count).</param>
         /// <param name="y">Vector of length m (row count), containing the result.</param>
-        public override void Multiply(double[] x, double[] y)
+        public override void Multiply(Real[] x, Real[] y)
         {
             var ax = this.Values;
             var ap = this.ColumnPointers;
             var ai = this.RowIndices;
 
+            const Real zero = (Real)0.0;
+
             // Clear y.
             for (int i = 0; i < rowCount; i++)
             {
-                y[i] = 0.0;
+                y[i] = zero;
             }
 
             int end;
@@ -205,7 +208,7 @@ namespace CSparse.Double
         /// <remarks>
         /// Input values of vector y will be accumulated.
         /// </remarks>
-        public override void Multiply(double alpha, double[] x, double beta, double[] y)
+        public override void Multiply(Real alpha, Real[] x, Real beta, Real[] y)
         {
             var ax = this.Values;
             var ap = this.ColumnPointers;
@@ -218,7 +221,7 @@ namespace CSparse.Double
             }
 
             int end;
-            double xi;
+            Real xi;
 
             for (int i = 0; i < columnCount; i++)
             {
@@ -238,17 +241,17 @@ namespace CSparse.Double
         /// </summary>
         /// <param name="x">Vector of length m (column count of A').</param>
         /// <param name="y">Vector of length n (row count of A'), containing the result.</param>
-        public override void TransposeMultiply(double[] x, double[] y)
+        public override void TransposeMultiply(Real[] x, Real[] y)
         {
             var ax = this.Values;
             var ap = this.ColumnPointers;
             var ai = this.RowIndices;
 
-            double yi;
+            Real yi;
 
             for (int i = 0; i < columnCount; i++)
             {
-                yi = 0.0;
+                yi = (Real)0.0;
 
                 // Compute the inner product of row i with vector x
                 for (int k = ap[i]; k < ap[i + 1]; k++)
@@ -271,13 +274,13 @@ namespace CSparse.Double
         /// <remarks>
         /// Input values of vector y will be accumulated.
         /// </remarks>
-        public override void TransposeMultiply(double alpha, double[] x, double beta, double[] y)
+        public override void TransposeMultiply(Real alpha, Real[] x, Real beta, Real[] y)
         {
             var ax = this.Values;
             var ap = this.ColumnPointers;
             var ai = this.RowIndices;
 
-            double yi;
+            Real yi;
 
             int end, start = ap[0];
 
@@ -312,8 +315,8 @@ namespace CSparse.Double
         /// the nonzero entries of the sum. An upper bound is the sum of the nonzeros count
         /// of (this) and (other).
         /// </remarks>
-        public override void Add(double alpha, double beta, CompressedColumnStorage<double> other,
-            CompressedColumnStorage<double> result)
+        public override void Add(Real alpha, Real beta, CompressedColumnStorage<Real, Real> other,
+            CompressedColumnStorage<Real, Real> result)
         {
             int p, j, nz = 0;
 
@@ -328,7 +331,7 @@ namespace CSparse.Double
 
             // Workspace
             var w = new int[m];
-            var x = new double[m];
+            var x = new Real[m];
 
             // Allocate result: (anz + bnz) is an upper bound
 
@@ -361,7 +364,7 @@ namespace CSparse.Double
         /// </summary>
         /// <param name="other">column-compressed matrix</param>
         /// <returns>C = A*B, null on error</returns>
-        public override CompressedColumnStorage<double> Multiply(CompressedColumnStorage<double> other)
+        public override CompressedColumnStorage<Real, Real> Multiply(CompressedColumnStorage<Real, Real> other)
         {
             int m = this.rowCount;
             int n = other.ColumnCount;
@@ -371,7 +374,7 @@ namespace CSparse.Double
 
             int p, j, nz = 0;
             int[] cp, ci;
-            double[] cx;
+            Real[] cx;
 
             // Check inputs
             if (other == null)
@@ -395,7 +398,7 @@ namespace CSparse.Double
 
             // Workspace
             var w = new int[m];
-            var x = new double[m];
+            var x = new Real[m];
 
             var result = new SparseMatrix(m, n, anz + bnz);
 
@@ -430,7 +433,7 @@ namespace CSparse.Double
         #endregion
 
         /// <inheritdoc />
-        public override bool Equals(Matrix<double> other, double tolerance)
+        public override bool Equals(Matrix<Real, Real> other, Real tolerance)
         {
             var o = other as SparseMatrix;
 
@@ -522,8 +525,8 @@ namespace CSparse.Double
         /// <param name="mat">pattern of x accumulated in C.i</param>
         /// <param name="nz">pattern of x placed in C starting at C.i[nz]</param>
         /// <returns>new value of nz, -1 on error</returns>
-        internal override int Scatter(int j, double beta, int[] w, double[] x, int mark,
-            CompressedColumnStorage<double> mat, int nz)
+        internal override int Scatter(int j, Real beta, int[] w, Real[] x, int mark,
+            CompressedColumnStorage<Real, Real> mat, int nz)
         {
             int i, p;
 

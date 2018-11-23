@@ -77,7 +77,7 @@ namespace CSparse.Ordering
         /// <param name="matrix">column-compressed matrix</param>
         /// <param name="seed">0: natural, -1: reverse, random order otherwise</param>
         /// <returns>Dulmage-Mendelsohn analysis</returns>
-        public static DulmageMendelsohn Generate<T>(CompressedColumnStorage<T> matrix, int seed = 0)
+        public static DulmageMendelsohn Generate<T, Scalar>(CompressedColumnStorage<T, Scalar> matrix, int seed = 0)
              where T : struct, IEquatable<T>, IFormattable
         {
             int i, j, k, cnz, nc, nb1, nb2;

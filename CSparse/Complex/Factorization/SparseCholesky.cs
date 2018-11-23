@@ -26,7 +26,7 @@ namespace CSparse.Complex.Factorization
         readonly int n;
 
         SymbolicFactorization S;
-        CompressedColumnStorage<Complex> L;
+        CompressedColumnStorage<Complex, double> L;
 
         Complex[] temp; // workspace
 
@@ -37,7 +37,7 @@ namespace CSparse.Complex.Factorization
         /// </summary>
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="order">Ordering method to use (natural or A+A').</param>
-        public static SparseCholesky Create(CompressedColumnStorage<Complex> A, ColumnOrdering order)
+        public static SparseCholesky Create(CompressedColumnStorage<Complex, double> A, ColumnOrdering order)
         {
             return Create(A, order, null);
         }
@@ -48,7 +48,7 @@ namespace CSparse.Complex.Factorization
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="order">Ordering method to use (natural or A+A').</param>
         /// <param name="progress">Report progress (range from 0.0 to 1.0).</param>
-        public static SparseCholesky Create(CompressedColumnStorage<Complex> A, ColumnOrdering order,
+        public static SparseCholesky Create(CompressedColumnStorage<Complex, double> A, ColumnOrdering order,
             IProgress<double> progress)
         {
             if ((int)order > 1)
@@ -64,7 +64,7 @@ namespace CSparse.Complex.Factorization
         /// </summary>
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="p">Permutation.</param>
-        public static SparseCholesky Create(CompressedColumnStorage<Complex> A, int[] p)
+        public static SparseCholesky Create(CompressedColumnStorage<Complex, double> A, int[] p)
         {
             return Create(A, p, null);
         }
@@ -75,7 +75,7 @@ namespace CSparse.Complex.Factorization
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="p">Permutation.</param>
         /// <param name="progress">Report progress (range from 0.0 to 1.0).</param>
-        public static SparseCholesky Create(CompressedColumnStorage<Complex> A, int[] p,
+        public static SparseCholesky Create(CompressedColumnStorage<Complex, double> A, int[] p,
             IProgress<double> progress)
         {
             Check.NotNull(A, "A");
@@ -140,7 +140,7 @@ namespace CSparse.Complex.Factorization
         /// </summary>
         /// <param name="w">The update matrix.</param>
         /// <returns>False, if updated matrix is not positive definite, otherwise true.</returns>
-        public bool Update(CompressedColumnStorage<Complex> w)
+        public bool Update(CompressedColumnStorage<Complex, double> w)
         {
             return UpDown(1, w);
         }
@@ -150,7 +150,7 @@ namespace CSparse.Complex.Factorization
         /// </summary>
         /// <param name="w">The update matrix.</param>
         /// <returns>False, if updated matrix is not positive definite, otherwise true.</returns>
-        public bool Downdate(CompressedColumnStorage<Complex> w)
+        public bool Downdate(CompressedColumnStorage<Complex, double> w)
         {
             return UpDown(-1, w);
         }
@@ -161,7 +161,7 @@ namespace CSparse.Complex.Factorization
         /// <param name="sigma">1 = update or -1 = downdate</param>
         /// <param name="w">The update matrix.</param>
         /// <returns>False, if updated matrix is not positive definite, otherwise true.</returns>
-        private bool UpDown(int sigma, CompressedColumnStorage<Complex> w)
+        private bool UpDown(int sigma, CompressedColumnStorage<Complex, double> w)
         {
             int n, p, f, j;
             Complex alpha, gamma, w1, w2, phase;
@@ -237,7 +237,7 @@ namespace CSparse.Complex.Factorization
         /// Compute the Numeric Cholesky factorization, L = chol (A, [pinv parent cp]).
         /// </summary>
         /// <returns>Numeric Cholesky factorization</returns>
-        private void Factorize(CompressedColumnStorage<Complex> A, IProgress<double> progress)
+        private void Factorize(CompressedColumnStorage<Complex, double> A, IProgress<double> progress)
         {
             Complex d, lki;
             int top, i, p, k, cci;
@@ -260,7 +260,7 @@ namespace CSparse.Complex.Factorization
             var ci = C.RowIndices;
             var cx = C.Values;
 
-            this.L = CompressedColumnStorage<Complex>.Create(n, n, colp[n]);
+            this.L = CompressedColumnStorage<Complex, double>.Create(n, n, colp[n]);
 
             var lp = L.ColumnPointers;
             var li = L.RowIndices;
@@ -331,7 +331,7 @@ namespace CSparse.Complex.Factorization
         /// </summary>
         /// <param name="A">Matrix to factorize.</param>
         /// <param name="p">Permutation.</param>
-        private void SymbolicAnalysis(CompressedColumnStorage<Complex> A, int[] p)
+        private void SymbolicAnalysis(CompressedColumnStorage<Complex, double> A, int[] p)
         {
             int n = A.ColumnCount;
 
@@ -365,7 +365,7 @@ namespace CSparse.Complex.Factorization
         /// <param name="pinv">size n, inverse permutation</param>
         /// <param name="values">allocate pattern only if false, values and pattern otherwise</param>
         /// <returns>Permuted matrix, C = PAP'</returns>
-        private CompressedColumnStorage<Complex> PermuteSym(CompressedColumnStorage<Complex> A, int[] pinv, bool values)
+        private CompressedColumnStorage<Complex, double> PermuteSym(CompressedColumnStorage<Complex, double> A, int[] pinv, bool values)
         {
             int i, j, p, q, i2, j2;
 

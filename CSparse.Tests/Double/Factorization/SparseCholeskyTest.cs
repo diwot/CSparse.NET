@@ -14,7 +14,7 @@ namespace CSparse.Tests.Double.Factorization
         public void TestSolve()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<double>("symmetric-40-spd.mat");
+            var A = ResourceLoader.Get<double, double>("symmetric-40-spd.mat");
 
             // Create test data.
             var x = Helper.CreateTestVector(A.ColumnCount);
@@ -36,7 +36,7 @@ namespace CSparse.Tests.Double.Factorization
         public void TestConstructorThrowsOnNonSpd()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<double>("symmetric-40.mat");
+            var A = ResourceLoader.Get<double, double>("symmetric-40.mat");
 
             Assert.Throws<Exception>(() =>
             {

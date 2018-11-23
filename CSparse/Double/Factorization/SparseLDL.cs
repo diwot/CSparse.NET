@@ -7,6 +7,7 @@
 
 namespace CSparse.Double.Factorization
 {
+    using Real = System.Double;
     using CSparse.Factorization;
     using CSparse.Ordering;
     using CSparse.Storage;
@@ -24,15 +25,15 @@ namespace CSparse.Double.Factorization
     /// P is provided) is accessed.  The lower triangular parts of the matrix A or
     /// PAP' can be present, but they are ignored.
     /// </remarks>
-    public class SparseLDL : ISparseFactorization<double>
+    public class SparseLDL : ISparseFactorization<Real>
     {
         SymbolicFactorization S;
-        CompressedColumnStorage<double> L;
-        double[] D;
+        CompressedColumnStorage<Real, Real> L;
+        Real[] D;
 
         int n;
 
-        public SparseLDL(CompressedColumnStorage<double> A, ColumnOrdering order)
+        public SparseLDL(CompressedColumnStorage<Real, Real> A, ColumnOrdering order)
         {
             if ((int)order > 1) // AtA ordering not allowed
             {
@@ -43,7 +44,7 @@ namespace CSparse.Double.Factorization
 
             // Ordering and symbolic analysis
             SymbolicAnalysis(order, A);
-            
+
             // Numeric Cholesky factorization
             Factorize(A);
         }
@@ -61,13 +62,13 @@ namespace CSparse.Double.Factorization
         /// </summary>
         /// <param name="input">Right hand side b.</param>
         /// <param name="result">Solution vector x.</param>
-        public void Solve(double[] input, double[] result)
+        public void Solve(Real[] input, Real[] result)
         {
             if (input == null) throw new ArgumentNullException("input");
 
             if (result == null) throw new ArgumentNullException("result");
 
-            double[] x = new double[n];
+            Real[] x = new Real[n];
 
             Permutation.ApplyInverse(S.pinv, input, x, n); // x = P*b
 
@@ -113,7 +114,7 @@ namespace CSparse.Double.Factorization
         /// </summary>
         /// <param name="order">Column ordering.</param>
         /// <param name="A">Matrix to factorize.</param>
-        private void SymbolicAnalysis(ColumnOrdering order, CompressedColumnStorage<double> A)
+        private void SymbolicAnalysis(ColumnOrdering order, CompressedColumnStorage<Real, Real> A)
         {
             int n = A.ColumnCount;
 
@@ -178,7 +179,7 @@ namespace CSparse.Double.Factorization
         /// <summary>
         /// Compute the numeric LDL' factorization of PAP'.
         /// </summary>
-        void Factorize(CompressedColumnStorage<double> A)
+        void Factorize(CompressedColumnStorage<Real, Real> A)
         {
             int n = A.ColumnCount;
 
@@ -190,8 +191,8 @@ namespace CSparse.Double.Factorization
             int[] P = S.q;
             int[] Pinv = S.pinv;
 
-            this.D = new double[n];
-            this.L = CompressedColumnStorage<double>.Create(n, n, S.cp[n]);
+            this.D = new Real[n];
+            this.L = CompressedColumnStorage<Real, Real>.Create(n, n, S.cp[n]);
 
             Array.Copy(S.cp, L.ColumnPointers, n + 1);
 
@@ -200,18 +201,20 @@ namespace CSparse.Double.Factorization
             var lx = L.Values;
 
             // Workspace
-            var y = new double[n];
+            var y = new Real[n];
             var pattern = new int[n];
             var flag = new int[n];
             var lnz = new int[n];
 
-            double yi, l_ki;
+            Real yi, l_ki;
             int i, k, p, kk, p2, len, top;
+
+            const Real zero = (Real)0.0;
 
             for (k = 0; k < n; k++)
             {
                 // compute nonzero Pattern of kth row of L, in topological order
-                y[k] = 0.0; // Y(0:k) is now all zero
+                y[k] = zero; // Y(0:k) is now all zero
                 top = n; // stack for pattern is empty
                 flag[k] = k; // mark node k as visited
                 lnz[k] = 0; // count of nonzeros in column k of L
@@ -237,12 +240,12 @@ namespace CSparse.Double.Factorization
 
                 // compute numerical values kth row of L (a sparse triangular solve)
                 D[k] = y[k]; // get D(k,k) and clear Y(k)
-                y[k] = 0.0;
+                y[k] = zero;
                 for (; top < n; top++)
                 {
                     i = pattern[top]; // Pattern [top:n-1] is pattern of L(:,k)
                     yi = y[i]; // get and clear Y(i)
-                    y[i] = 0.0;
+                    y[i] = zero;
                     p2 = lp[i] + lnz[i];
                     for (p = lp[i]; p < p2; p++)
                     {

@@ -31,24 +31,24 @@ namespace CSparse.IO
         /// <summary>
         /// Read a matrix from file.
         /// </summary>
-        public static CompressedColumnStorage<T> ReadMatrix<T>(string filePath)
+        public static CompressedColumnStorage<T, Scalar> ReadMatrix<T, Scalar>(string filePath)
             where T : struct, IEquatable<T>, IFormattable
         {
             using (var stream = File.OpenRead(filePath))
             {
-                return ReadMatrix<T>(stream);
+                return ReadMatrix<T, Scalar>(stream);
             }
         }
 
         /// <summary>
         /// Read a matrix from stream.
         /// </summary>
-        public static CompressedColumnStorage<T> ReadMatrix<T>(Stream stream)
+        public static CompressedColumnStorage<T, Scalar> ReadMatrix<T, Scalar>(Stream stream)
             where T : struct, IEquatable<T>, IFormattable
         {
             using (var reader = new StreamReader(stream))
             {
-                return Converter.ToCompressedColumnStorage(ReadStorage<T>(reader));
+                return Converter.ToCompressedColumnStorage<T, Scalar>(ReadStorage<T>(reader));
             }
         }
 

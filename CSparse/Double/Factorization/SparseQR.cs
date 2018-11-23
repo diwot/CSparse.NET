@@ -7,6 +7,7 @@
 
 namespace CSparse.Double.Factorization
 {
+    using Real = System.Double;
     using CSparse.Factorization;
     using CSparse.Ordering;
     using CSparse.Storage;
@@ -19,7 +20,7 @@ namespace CSparse.Double.Factorization
     /// See Chapter 5 (Orthogonal methods) in "Direct Methods for Sparse Linear Systems"
     /// by Tim Davis.
     /// </remarks>
-    public class SparseQR : SparseQR<double>
+    public class SparseQR : SparseQR<Real>
     {
         #region Static methods
 
@@ -28,7 +29,7 @@ namespace CSparse.Double.Factorization
         /// </summary>
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="order">Ordering method to use (natural or A+A').</param>
-        public static SparseQR Create(CompressedColumnStorage<double> A, ColumnOrdering order)
+        public static SparseQR Create(CompressedColumnStorage<Real, Real> A, ColumnOrdering order)
         {
             return Create(A, order, null);
         }
@@ -39,8 +40,8 @@ namespace CSparse.Double.Factorization
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="order">Ordering method to use (natural or A+A').</param>
         /// <param name="progress">Report progress (range from 0.0 to 1.0).</param>
-        public static SparseQR Create(CompressedColumnStorage<double> A, ColumnOrdering order,
-            IProgress<double> progress)
+        public static SparseQR Create(CompressedColumnStorage<Real, Real> A, ColumnOrdering order,
+            IProgress<Real> progress)
         {
             Check.NotNull(A, "A");
 
@@ -92,13 +93,13 @@ namespace CSparse.Double.Factorization
         /// Let A be a m-by-n matrix. If m >= n a least-squares problem (min |Ax-b|)
         /// is solved. If m &lt; n the underdetermined system is solved.
         /// </remarks>
-        public override void Solve(double[] input, double[] result)
+        public override void Solve(Real[] input, Real[] result)
         {
             if (input == null) throw new ArgumentNullException("input");
 
             if (result == null) throw new ArgumentNullException("result");
 
-            var x = new double[S.m2];
+            var x = new Real[S.m2];
 
             if (m >= n)
             {
@@ -142,9 +143,9 @@ namespace CSparse.Double.Factorization
         /// Note that this CXSparse version is different than CSparse.  See Higham,
         /// Accuracy and Stability of Num Algorithms, 2nd ed, 2002, page 357.
         /// </remarks>
-        protected override double CreateHouseholder(double[] x, int offset, ref double beta, int n)
+        protected override Real CreateHouseholder(Real[] x, int offset, ref Real beta, int n)
         {
-            double s = 0;
+            Real s = (Real)0;
             int i;
             if (x == null) return -1; // check inputs
 
@@ -154,7 +155,7 @@ namespace CSparse.Double.Factorization
                 s += x[offset + i] * x[offset + i];
             }
 
-            s = Math.Sqrt(s);
+            s = (Real)Math.Sqrt(s);
             if (s == 0)
             {
                 beta = 0;
@@ -176,10 +177,10 @@ namespace CSparse.Double.Factorization
         /// <summary>
         /// Apply the ith Householder vector to x.
         /// </summary>
-        protected override bool ApplyHouseholder(CompressedColumnStorage<double> V, int i, double beta, double[] x)
+        protected override bool ApplyHouseholder(CompressedColumnStorage<Real, Real> V, int i, Real beta, Real[] x)
         {
             int p = 0;
-            double tau = 0;
+            Real tau = 0;
 
             if (x == null) return false; // check inputs
 

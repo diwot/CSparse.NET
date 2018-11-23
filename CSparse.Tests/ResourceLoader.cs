@@ -20,7 +20,7 @@ namespace CSparse.Tests
             return Assembly.GetExecutingAssembly().GetManifestResourceStream(path);
         }
 
-        public static CompressedColumnStorage<T> Get<T>(string resource)
+        public static CompressedColumnStorage<T, Scalar> Get<T, Scalar>(string resource)
             where T : struct, IEquatable<T>, IFormattable
         {
             try
@@ -33,12 +33,12 @@ namespace CSparse.Tests
 
                 if (cache.TryGetValue(path, out obj))
                 {
-                    return (CompressedColumnStorage<T>)obj;
+                    return (CompressedColumnStorage<T, Scalar>)obj;
                 }
 
                 var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(path);
 
-                var matrix = MatrixMarketReader.ReadMatrix<T>(stream);
+                var matrix = MatrixMarketReader.ReadMatrix<T, Scalar>(stream);
 
                 cache.Add(path, matrix);
 

@@ -7,6 +7,7 @@
 
 namespace CSparse.Double.Factorization
 {
+    using Real = System.Double;
     using CSparse.Factorization;
     using CSparse.Ordering;
     using CSparse.Properties;
@@ -20,14 +21,14 @@ namespace CSparse.Double.Factorization
     /// See Chapter 4 (Cholesky factorization) in "Direct Methods for Sparse Linear Systems"
     /// by Tim Davis.
     /// </remarks>
-    public class SparseCholesky : ISparseFactorization<double>
+    public class SparseCholesky : ISparseFactorization<Real>
     {
         readonly int n;
 
         SymbolicFactorization S;
-        CompressedColumnStorage<double> L;
+        CompressedColumnStorage<Real, Real> L;
 
-        double[] temp; // workspace
+        Real[] temp; // workspace
 
         #region Static methods
 
@@ -36,7 +37,7 @@ namespace CSparse.Double.Factorization
         /// </summary>
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="order">Ordering method to use (natural or A+A').</param>
-        public static SparseCholesky Create(CompressedColumnStorage<double> A, ColumnOrdering order)
+        public static SparseCholesky Create(CompressedColumnStorage<Real, Real> A, ColumnOrdering order)
         {
             return Create(A, order, null);
         }
@@ -47,8 +48,8 @@ namespace CSparse.Double.Factorization
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="order">Ordering method to use (natural or A+A').</param>
         /// <param name="progress">Report progress (range from 0.0 to 1.0).</param>
-        public static SparseCholesky Create(CompressedColumnStorage<double> A, ColumnOrdering order,
-            IProgress<double> progress)
+        public static SparseCholesky Create(CompressedColumnStorage<Real, Real> A, ColumnOrdering order,
+            IProgress<Real> progress)
         {
             if ((int)order > 1)
             {
@@ -63,7 +64,7 @@ namespace CSparse.Double.Factorization
         /// </summary>
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="p">Permutation.</param>
-        public static SparseCholesky Create(CompressedColumnStorage<double> A, int[] p)
+        public static SparseCholesky Create(CompressedColumnStorage<Real, Real> A, int[] p)
         {
             return Create(A, p, null);
         }
@@ -74,8 +75,8 @@ namespace CSparse.Double.Factorization
         /// <param name="A">Column-compressed matrix, symmetric positive definite.</param>
         /// <param name="p">Permutation.</param>
         /// <param name="progress">Report progress (range from 0.0 to 1.0).</param>
-        public static SparseCholesky Create(CompressedColumnStorage<double> A, int[] p,
-            IProgress<double> progress)
+        public static SparseCholesky Create(CompressedColumnStorage<Real, Real> A, int[] p,
+            IProgress<Real> progress)
         {
             Check.NotNull(A, "A");
             Check.NotNull(p, "p");
@@ -101,7 +102,7 @@ namespace CSparse.Double.Factorization
         private SparseCholesky(int n)
         {
             this.n = n;
-            this.temp = new double[n];
+            this.temp = new Real[n];
         }
 
         /// <summary>
@@ -117,7 +118,7 @@ namespace CSparse.Double.Factorization
         /// </summary>
         /// <param name="input">The right hand side vector, <c>b</c>.</param>
         /// <param name="result">The left hand side vector, <c>x</c>.</param>
-        public void Solve(double[] input, double[] result)
+        public void Solve(Real[] input, Real[] result)
         {
             if (input == null) throw new ArgumentNullException("input");
 
@@ -139,7 +140,7 @@ namespace CSparse.Double.Factorization
         /// </summary>
         /// <param name="w">The update matrix.</param>
         /// <returns>False, if updated matrix is not positive definite, otherwise true.</returns>
-        public bool Update(CompressedColumnStorage<double> w)
+        public bool Update(CompressedColumnStorage<Real, Real> w)
         {
             return UpDown(1, w);
         }
@@ -149,7 +150,7 @@ namespace CSparse.Double.Factorization
         /// </summary>
         /// <param name="w">The update matrix.</param>
         /// <returns>False, if updated matrix is not positive definite, otherwise true.</returns>
-        public bool Downdate(CompressedColumnStorage<double> w)
+        public bool Downdate(CompressedColumnStorage<Real, Real> w)
         {
             return UpDown(-1, w);
         }
@@ -160,11 +161,11 @@ namespace CSparse.Double.Factorization
         /// <param name="sigma">1 = update or -1 = downdate</param>
         /// <param name="w">The update matrix.</param>
         /// <returns>False, if updated matrix is not positive definite, otherwise true.</returns>
-        private bool UpDown(int sigma, CompressedColumnStorage<double> w)
+        private bool UpDown(int sigma, CompressedColumnStorage<Real, Real> w)
         {
             int n, p, f, j;
-            double alpha, gamma, w1, w2;
-            double beta = 1, beta2 = 1, delta;
+            Real alpha, gamma, w1, w2;
+            Real beta = (Real)1, beta2 = (Real)1, delta;
 
             var parent = S.parent;
 
@@ -188,7 +189,7 @@ namespace CSparse.Double.Factorization
                 return true; // return if C empty
             }
 
-            var work = new double[n]; // get workspace
+            var work = new Real[n]; // get workspace
 
             f = ci[p];
             for (; p < cp[1]; p++)
@@ -211,7 +212,7 @@ namespace CSparse.Double.Factorization
 
                 if (beta2 <= 0) break;
 
-                beta2 = Math.Sqrt(beta2);
+                beta2 = (Real)Math.Sqrt(beta2);
                 delta = (sigma > 0) ? (beta / beta2) : (beta2 / beta);
                 gamma = sigma * alpha / (beta2 * beta);
                 lx[p] = delta * lx[p] + ((sigma > 0) ? (gamma * work[j]) : 0);
@@ -232,9 +233,9 @@ namespace CSparse.Double.Factorization
         /// Compute the Numeric Cholesky factorization, L = chol (A, [pinv parent cp]).
         /// </summary>
         /// <returns>Numeric Cholesky factorization</returns>
-        private void Factorize(CompressedColumnStorage<double> A, IProgress<double> progress)
+        private void Factorize(CompressedColumnStorage<Real, Real> A, IProgress<Real> progress)
         {
-            double d, lki;
+            Real d, lki;
             int top, i, p, k, cci;
 
             int n = A.ColumnCount;
@@ -255,7 +256,7 @@ namespace CSparse.Double.Factorization
             var ci = C.RowIndices;
             var cx = C.Values;
 
-            this.L = CompressedColumnStorage<double>.Create(n, n, colp[n]);
+            this.L = CompressedColumnStorage<Real, Real>.Create(n, n, colp[n]);
 
             var lp = L.ColumnPointers;
             var li = L.RowIndices;
@@ -266,8 +267,8 @@ namespace CSparse.Double.Factorization
                 lp[k] = c[k] = colp[k];
             }
 
-            double current = 0.0;
-            double step = n / 100.0;
+            Real current = (Real)0.0;
+            Real step = n / (Real)100.0;
 
             for (k = 0; k < n; k++) // compute L(k,:) for L*L' = C
             {
@@ -278,7 +279,7 @@ namespace CSparse.Double.Factorization
 
                     if (progress != null)
                     {
-                        progress.Report(k / (double)n);
+                        progress.Report(k / (Real)n);
                     }
                 }
 
@@ -316,7 +317,7 @@ namespace CSparse.Double.Factorization
 
                 p = c[k]++;
                 li[p] = k; // store L(k,k) = sqrt (d) in column k
-                lx[p] = Math.Sqrt(d);
+                lx[p] = (Real)Math.Sqrt(d);
             }
             lp[n] = colp[n]; // finalize L
         }
@@ -326,7 +327,7 @@ namespace CSparse.Double.Factorization
         /// </summary>
         /// <param name="A">Matrix to factorize.</param>
         /// <param name="p">Permutation.</param>
-        private void SymbolicAnalysis(CompressedColumnStorage<double> A, int[] p)
+        private void SymbolicAnalysis(CompressedColumnStorage<Real, Real> A, int[] p)
         {
             int n = A.ColumnCount;
 
@@ -360,7 +361,7 @@ namespace CSparse.Double.Factorization
         /// <param name="pinv">size n, inverse permutation</param>
         /// <param name="values">allocate pattern only if false, values and pattern otherwise</param>
         /// <returns>Permuted matrix, C = PAP'</returns>
-        private CompressedColumnStorage<double> PermuteSym(CompressedColumnStorage<double> A, int[] pinv, bool values)
+        private CompressedColumnStorage<Real, Real> PermuteSym(CompressedColumnStorage<Real, Real> A, int[] pinv, bool values)
         {
             int i, j, p, q, i2, j2;
 

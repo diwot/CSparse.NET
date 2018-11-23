@@ -16,7 +16,7 @@ namespace CSparse.Complex
     /// <inheritdoc />
     [DebuggerDisplay("SparseMatrix {RowCount}x{ColumnCount}-Complex {NonZerosCount}-NonZero")]
     [Serializable]
-    public class SparseMatrix : CompressedColumnStorage<Complex>
+    public class SparseMatrix : CompressedColumnStorage<Complex, double>
     {
         /// <summary>
         /// Initializes a new instance of the SparseMatrix class.
@@ -309,7 +309,7 @@ namespace CSparse.Complex
         /// values. Set <paramref name="storage"/> to <c>true</c>, to transpose on storage level
         /// (meaning, the storage is converted from CSC to CSR).
         /// </remarks>
-        public override void Transpose(CompressedColumnStorage<Complex> result, bool storage)
+        public override void Transpose(CompressedColumnStorage<Complex, double> result, bool storage)
         {
             if (storage)
             {
@@ -360,8 +360,8 @@ namespace CSparse.Complex
         /// the nonzero entries of the sum. An upper bound is the sum of the nonzeros count
         /// of (this) and (other).
         /// </remarks>
-        public override void Add(Complex alpha, Complex beta, CompressedColumnStorage<Complex> other,
-            CompressedColumnStorage<Complex> result)
+        public override void Add(Complex alpha, Complex beta, CompressedColumnStorage<Complex, double> other,
+            CompressedColumnStorage<Complex, double> result)
         {
             int p, j, nz = 0;
 
@@ -409,7 +409,7 @@ namespace CSparse.Complex
         /// </summary>
         /// <param name="other">column-compressed matrix</param>
         /// <returns>C = A*B, null on error</returns>
-        public override CompressedColumnStorage<Complex> Multiply(CompressedColumnStorage<Complex> other)
+        public override CompressedColumnStorage<Complex, double> Multiply(CompressedColumnStorage<Complex, double> other)
         {
             int m = this.rowCount;
             int n = other.ColumnCount;
@@ -511,7 +511,7 @@ namespace CSparse.Complex
         #endregion
 
         /// <inheritdoc />
-        public override bool Equals(Matrix<Complex> other, double tolerance)
+        public override bool Equals(Matrix<Complex, double> other, double tolerance)
         {
             var o = other as SparseMatrix;
 
@@ -604,7 +604,7 @@ namespace CSparse.Complex
         /// <param name="nz">pattern of x placed in C starting at C.i[nz]</param>
         /// <returns>new value of nz, -1 on error</returns>
         internal override int Scatter(int j, Complex beta, int[] w, Complex[] x, int mark,
-            CompressedColumnStorage<Complex> mat, int nz)
+            CompressedColumnStorage<Complex, double> mat, int nz)
         {
             int i, p;
 
