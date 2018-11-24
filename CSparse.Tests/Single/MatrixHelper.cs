@@ -1,7 +1,7 @@
 ﻿
-namespace CSparse.Tests.Double
+namespace CSparse.Tests.Single
 {
-    using Real = System.Double;
+    using Real = System.Single;
     using CSparse.Storage;
     using System.Collections.Generic;
 

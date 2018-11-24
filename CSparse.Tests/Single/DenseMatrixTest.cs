@@ -1,8 +1,8 @@
 ﻿
-namespace CSparse.Tests.Double
+namespace CSparse.Tests.Single
 {
-    using Real = System.Double;
-    using CSparse.Double;
+    using Real = System.Single;
+    using CSparse.Single;
     using NUnit.Framework;
     using System;
 

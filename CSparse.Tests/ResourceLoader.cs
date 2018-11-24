@@ -26,6 +26,7 @@ namespace CSparse.Tests
             try
             {
                 string type = (typeof(T) == typeof(double)) ? "Double" : "Complex";
+                if (typeof(T) == typeof(float)) type = "Single";
 
                 string path = NS.Replace("{Type}", type) + "." + resource;
 

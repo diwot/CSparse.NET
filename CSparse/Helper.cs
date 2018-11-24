@@ -53,6 +53,11 @@ namespace CSparse
                 return (T)(object)System.Numerics.Complex.One;
             }
 
+            if (typeof(T) == typeof(float))
+            {
+                return (T)(object)1.0f;
+            }
+
             throw new NotSupportedException();
         }
 
@@ -71,6 +76,11 @@ namespace CSparse
             if (typeof(T) == typeof(System.Numerics.Complex))
             {
                 return (T)(object)System.Numerics.Complex.Zero;
+            }
+
+            if (typeof(T) == typeof(float))
+            {
+                return (T)(object)0.0f;
             }
 
             throw new NotSupportedException();

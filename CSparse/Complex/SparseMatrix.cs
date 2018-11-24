@@ -151,7 +151,7 @@ namespace CSparse.Complex
             int nz = this.NonZerosCount;
 
             double sum = 0.0, norm = 0.0;
-            
+
             for (int i = 0; i < nz; i++)
             {
                 sum = Complex.Abs(Values[i]);
@@ -162,7 +162,7 @@ namespace CSparse.Complex
         }
 
         #endregion
-        
+
         #region Linear Algebra (Vector)
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace CSparse.Complex
             var ax = this.Values;
             var ap = this.ColumnPointers;
             var ai = this.RowIndices;
-            
+
             // Clear y.
             for (int i = 0; i < rowCount; i++)
             {
@@ -416,7 +416,7 @@ namespace CSparse.Complex
 
             int anz = this.NonZerosCount;
             int bnz = other.NonZerosCount;
-            
+
             int p, j, nz = 0;
             int[] cp, ci;
             Complex[] cx;
@@ -511,6 +511,24 @@ namespace CSparse.Complex
         #endregion
 
         /// <inheritdoc />
+        public override bool Equals(Matrix<Complex, double> other)
+        {
+            // Reject equality when the argument is null or has a different shape.
+            if (other == null)
+            {
+                return false;
+            }
+
+            // Accept if the argument is the same object as this.
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return Equals(other, Constants.EqualsThreshold);
+        }
+
+        /// <inheritdoc />
         public override bool Equals(Matrix<Complex, double> other, double tolerance)
         {
             var o = other as SparseMatrix;
@@ -553,7 +571,7 @@ namespace CSparse.Complex
         }
 
         #region Internal methods
-        
+
         internal override void Cleanup()
         {
             int i, j, p, q, nnz = 0;

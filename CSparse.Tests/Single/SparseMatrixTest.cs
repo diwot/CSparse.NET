@@ -1,8 +1,8 @@
 ﻿
-namespace CSparse.Tests.Double
+namespace CSparse.Tests.Single
 {
-    using Real = System.Double;
-    using CSparse.Double;
+    using Real = System.Single;
+    using CSparse.Single;
     using CSparse.Storage;
     using NUnit.Framework;
     using System;
@@ -250,7 +250,7 @@ namespace CSparse.Tests.Double
 
             var actualColumn = new Real[rows];
             var expectedColumn = new Real[rows];
-
+            
             for (int i = 0; i < columns; i++)
             {
                 A.Column(p[i], expectedColumn);

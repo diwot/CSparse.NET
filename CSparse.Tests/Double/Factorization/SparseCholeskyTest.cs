@@ -1,6 +1,7 @@
 ﻿
 namespace CSparse.Tests.Double.Factorization
 {
+    using Real = System.Double;
     using CSparse.Double;
     using CSparse.Double.Factorization;
     using NUnit.Framework;
@@ -8,13 +9,13 @@ namespace CSparse.Tests.Double.Factorization
 
     public class SparseCholeskyTest
     {
-        private const double EPS = 1.0e-6;
+        private const Real EPS = (Real)1.0e-6;
 
         [Test]
         public void TestSolve()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<double, double>("symmetric-40-spd.mat");
+            var A = ResourceLoader.Get<Real, Real>("symmetric-40-spd.mat");
 
             // Create test data.
             var x = Helper.CreateTestVector(A.ColumnCount);
@@ -27,7 +28,7 @@ namespace CSparse.Tests.Double.Factorization
             chol.Solve(b, x);
 
             // Compute residual r = b - Ax.
-            A.Multiply(-1.0, x, 1.0, r);
+            A.Multiply((Real)(-1.0), x, (Real)1.0, r);
 
             Assert.IsTrue(Vector.Norm(r) < EPS);
         }
@@ -36,7 +37,7 @@ namespace CSparse.Tests.Double.Factorization
         public void TestConstructorThrowsOnNonSpd()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<double, double>("symmetric-40.mat");
+            var A = ResourceLoader.Get<Real, Real>("symmetric-40.mat");
 
             Assert.Throws<Exception>(() =>
             {

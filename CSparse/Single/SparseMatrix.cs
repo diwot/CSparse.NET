@@ -433,6 +433,24 @@ namespace CSparse.Single
         #endregion
 
         /// <inheritdoc />
+        public override bool Equals(Matrix<Real, Real> other)
+        {
+            // Reject equality when the argument is null or has a different shape.
+            if (other == null)
+            {
+                return false;
+            }
+
+            // Accept if the argument is the same object as this.
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return Equals(other, (Real)Constants.EqualsThreshold);
+        }
+
+        /// <inheritdoc />
         public override bool Equals(Matrix<Real, Real> other, Real tolerance)
         {
             var o = other as SparseMatrix;

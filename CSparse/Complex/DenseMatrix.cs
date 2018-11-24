@@ -47,7 +47,7 @@ namespace CSparse.Complex
 
             return norm;
         }
-        
+
         /// <inheritdoc />
         public override double InfinityNorm()
         {
@@ -262,6 +262,24 @@ namespace CSparse.Complex
             {
                 target[i] = x[i] * y[i];
             }
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(Matrix<Complex, double> other)
+        {
+            // Reject equality when the argument is null or has a different shape.
+            if (other == null)
+            {
+                return false;
+            }
+
+            // Accept if the argument is the same object as this.
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return Equals(other, Constants.EqualsThreshold);
         }
 
         /// <inheritdoc />

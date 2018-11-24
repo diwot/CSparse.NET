@@ -47,6 +47,14 @@
     <Compile Include="Complex\MatrixHelper.cs" />
     <Compile Include="ConverterTest.cs" />
     <Compile Include="DenseTestData.cs" />
+    <Compile Include="Single\DenseMatrixTest.cs" />
+    <Compile Include="Single\DenseTestDataReader.cs" />
+    <Compile Include="Single\Factorization\SparseCholeskyTest.cs" />
+    <Compile Include="Single\Factorization\SparseLUTest.cs" />
+    <Compile Include="Single\Factorization\SparseQRTest.cs" />
+    <Compile Include="Single\Helper.cs" />
+    <Compile Include="Single\MatrixHelper.cs" />
+    <Compile Include="Single\SparseMatrixTest.cs" />
     <Compile Include="SparseTestData.cs" />
     <Compile Include="Double\SparseMatrixTest.cs" />
     <Compile Include="Double\DenseMatrixTest.cs" />
@@ -86,10 +94,21 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <EmbeddedResource Include="Single\Data\general-20x40.mat" />
+    <EmbeddedResource Include="Single\Data\general-40x20.mat" />
+    <EmbeddedResource Include="Single\Data\general-40x40.mat" />
+    <EmbeddedResource Include="Single\Data\symmetric-40-spd.mat" />
+    <EmbeddedResource Include="Single\Data\symmetric-40.mat" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Double\Data\test-data-dense-2x2.txt" />
     <EmbeddedResource Include="Double\Data\test-data-dense-2x3.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Single\Data\test-data-dense-2x2.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Single\Data\test-data-dense-2x3.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

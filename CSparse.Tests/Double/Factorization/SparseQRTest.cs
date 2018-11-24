@@ -1,19 +1,20 @@
 ﻿
 namespace CSparse.Tests.Double.Factorization
 {
+    using Real = System.Double;
     using CSparse.Double;
     using CSparse.Double.Factorization;
     using NUnit.Framework;
 
     public class SparseQRTest
     {
-        private const double EPS = 1.0e-6;
+        private const double EPS = (Real)1.0e-6;
 
         [Test]
         public void TestSolve()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<double, double>("general-40x40.mat");
+            var A = ResourceLoader.Get<Real, Real>("general-40x40.mat");
 
             Assert.AreEqual(A.RowCount, A.ColumnCount);
 
@@ -28,7 +29,7 @@ namespace CSparse.Tests.Double.Factorization
             qr.Solve(b, x);
 
             // Compute residual r = b - Ax.
-            A.Multiply(-1.0, x, 1.0, r);
+            A.Multiply((Real)(-1.0), x, (Real)1.0, r);
 
             Assert.IsTrue(Vector.Norm(r) < EPS);
         }
@@ -37,7 +38,7 @@ namespace CSparse.Tests.Double.Factorization
         public void TestSolveOverdetermined()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<double, double>("general-40x20.mat");
+            var A = ResourceLoader.Get<Real, Real>("general-40x20.mat");
 
             int m = A.RowCount;
             int n = A.ColumnCount;
@@ -55,7 +56,7 @@ namespace CSparse.Tests.Double.Factorization
             qr.Solve(b, x);
 
             // Compute residual r = b - Ax.
-            A.Multiply(-1.0, x, 1.0, r);
+            A.Multiply((Real)(-1.0), x, (Real)1.0, r);
 
             Assert.IsTrue(Vector.Norm(r) < EPS);
         }
@@ -64,7 +65,7 @@ namespace CSparse.Tests.Double.Factorization
         public void TestSolveUnderdetermined()
         {
             // Load matrix from a file.
-            var A = ResourceLoader.Get<double, double>("general-20x40.mat");
+            var A = ResourceLoader.Get<Real, Real>("general-20x40.mat");
 
             int m = A.RowCount;
             int n = A.ColumnCount;
@@ -83,7 +84,7 @@ namespace CSparse.Tests.Double.Factorization
             qr.Solve(b, x);
 
             // Compute residuals.
-            A.Multiply(-1.0, x, 1.0, r);
+            A.Multiply((Real)(-1.0), x, (Real)1.0, r);
 
             Assert.IsTrue(Vector.Norm(r) < EPS);
         }

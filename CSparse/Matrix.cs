@@ -145,22 +145,7 @@ namespace CSparse
         /// <returns>
         /// <c>true</c> if the current object is equal to the <paramref name="other"/> parameter; otherwise, <c>false</c>.
         /// </returns>
-        public virtual bool Equals(Matrix<T, Scalar> other)
-        {
-            // Reject equality when the argument is null or has a different shape.
-            if (other == null)
-            {
-                return false;
-            }
-
-            // Accept if the argument is the same object as this.
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            return Equals(other, Constants.EqualsThreshold);
-        }
+        public abstract bool Equals(Matrix<T, Scalar> other);
 
         /// <summary>
         /// Check two matrices for equality.

@@ -279,6 +279,12 @@ namespace CSparse.IO
                     : (Func<int, string[], T>)((offset, tokens) => (T)(object)new Complex(double.Parse(tokens[offset], NumberStyles.Any, nfi), 0d));
             }
 
+            if (typeof(T) == typeof(float))
+            {
+                // ignore imaginary part if source is complex
+                return (offset, tokens) => (T)(object)float.Parse(tokens[offset], NumberStyles.Any, nfi);
+            }
+
             throw new NotSupportedException();
         }
 
@@ -297,6 +303,11 @@ namespace CSparse.IO
             if (typeof(T) == typeof(Complex))
             {
                 return x => (T)(object)Complex.Conjugate((Complex)(object)x);
+            }
+
+            if (typeof(T) == typeof(float))
+            {
+                return x => x;
             }
 
             throw new NotSupportedException();
