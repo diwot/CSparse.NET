@@ -9,6 +9,7 @@ namespace CSparse.Single
 {
     using Real = System.Single;
     using CSparse.Storage;
+    using System.Numerics;
 
     public static class SolverHelper
     {
@@ -29,6 +30,33 @@ namespace CSparse.Single
             for (j = 0; j < n; j++)
             {
                 x[j] /= lx[lp[j]];
+
+                k = lp[j + 1];
+
+                for (p = lp[j] + 1; p < k; p++)
+                {
+                    x[li[p]] -= lx[p] * x[j];
+                }
+            }
+        }
+
+        /// <summary>
+        /// Solve a lower triangular system by forward elimination, Lx=b.
+        /// </summary>
+        /// <param name="L"></param>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        public static void SolveLower(CompressedColumnStorage<Real, Real> L, Vector<Real>[] x)
+        {
+            int p, j, k, n = L.ColumnCount;
+
+            var lp = L.ColumnPointers;
+            var li = L.RowIndices;
+            var lx = L.Values;
+
+            for (j = 0; j < n; j++)
+            {
+                x[j] *= ((Real)1.0 / lx[lp[j]]);
 
                 k = lp[j + 1];
 
@@ -63,6 +91,33 @@ namespace CSparse.Single
                 }
 
                 x[j] /= lx[lp[j]];
+            }
+        }
+
+        /// <summary>
+        /// Solve L'x=b where x and b are dense.
+        /// </summary>
+        /// <param name="L"></param>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        public static void SolveLowerTranspose(CompressedColumnStorage<Real, Real> L, Vector<Real>[] x)
+        {
+            int p, j, k, n = L.ColumnCount;
+
+            var lp = L.ColumnPointers;
+            var li = L.RowIndices;
+            var lx = L.Values;
+
+            for (j = n - 1; j >= 0; j--)
+            {
+                k = lp[j + 1];
+
+                for (p = lp[j] + 1; p < k; p++)
+                {
+                    x[j] -= lx[p] * x[li[p]];
+                }
+
+                x[j] *= ((Real)1.0 / lx[lp[j]]);
             }
         }
 

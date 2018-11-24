@@ -13,6 +13,7 @@ namespace CSparse.Single.Factorization
     using CSparse.Properties;
     using CSparse.Storage;
     using System;
+    using System.Numerics;
 
     /// <summary>
     /// Sparse Cholesky decomposition (only upper triangular part is used).
@@ -28,7 +29,7 @@ namespace CSparse.Single.Factorization
         SymbolicFactorization S;
         CompressedColumnStorage<Real, Real> L;
 
-        Real[] temp; // workspace
+        //Real[] temp; // workspace
 
         #region Static methods
 
@@ -102,7 +103,7 @@ namespace CSparse.Single.Factorization
         private SparseCholesky(int n)
         {
             this.n = n;
-            this.temp = new Real[n];
+            //this.temp = new Real[n];
         }
 
         /// <summary>
@@ -124,7 +125,29 @@ namespace CSparse.Single.Factorization
 
             if (result == null) throw new ArgumentNullException("result");
 
-            var x = this.temp;
+            var x = new Real[n]; // this.temp;
+
+            Permutation.ApplyInverse(S.pinv, input, x, n); // x = P*b
+
+            SolverHelper.SolveLower(L, x); // x = L\x
+
+            SolverHelper.SolveLowerTranspose(L, x); // x = L'\x
+
+            Permutation.Apply(S.pinv, x, result, n); // b = P'*x
+        }
+
+        /// <summary>
+        /// Solves a system of linear equations, <c>Ax = b</c>.
+        /// </summary>
+        /// <param name="input">The right hand side vector, <c>b</c>.</param>
+        /// <param name="result">The left hand side vector, <c>x</c>.</param>
+        public void Solve(Vector<Real>[] input, Vector<Real>[] result)
+        {
+            if (input == null) throw new ArgumentNullException("input");
+
+            if (result == null) throw new ArgumentNullException("result");
+
+            var x = new Vector<Real>[n]; // this.temp;
 
             Permutation.ApplyInverse(S.pinv, input, x, n); // x = P*b
 
@@ -244,7 +267,7 @@ namespace CSparse.Single.Factorization
             var c = new int[n];
             var s = new int[n];
 
-            var x = this.temp;
+            var x = new Real[n]; // this.temp;
 
             var colp = S.cp;
             var pinv = S.pinv;

@@ -12,6 +12,7 @@ namespace CSparse.Single.Factorization
     using CSparse.Ordering;
     using CSparse.Storage;
     using System;
+    using System.Numerics;
 
     /// <summary>
     /// Sparse LDL' factorization.
@@ -94,6 +95,58 @@ namespace CSparse.Single.Factorization
             for (int i = 0; i < n; i++)
             {
                 x[i] /= d[i];
+            }
+
+            // Solve upper triangular system by backward elimination, x = L'\x.
+            for (int i = n - 1; i >= 0; i--)
+            {
+                end = lp[i + 1];
+                for (int p = lp[i]; p < end; p++)
+                {
+                    x[i] -= lx[p] * x[li[p]];
+                }
+            }
+
+            Permutation.Apply(S.pinv, x, result, n); // b = P'*x
+        }
+
+        /// <summary>
+        /// Solves a linear system Ax=b, where A is symmetric positive definite.
+        /// </summary>
+        /// <param name="input">Right hand side b.</param>
+        /// <param name="result">Solution vector x.</param>
+        public void Solve(Vector<Real>[] input, Vector<Real>[] result)
+        {
+            if (input == null) throw new ArgumentNullException("input");
+
+            if (result == null) throw new ArgumentNullException("result");
+
+            Vector<Real>[] x = new Vector<Real>[n];
+
+            Permutation.ApplyInverse(S.pinv, input, x, n); // x = P*b
+
+            var lx = L.Values;
+            var lp = L.ColumnPointers;
+            var li = L.RowIndices;
+
+            var d = this.D;
+
+            int end;
+
+            // Solve lower triangular system by forward elimination, x = L\x.
+            for (int i = 0; i < n; i++)
+            {
+                end = lp[i + 1];
+                for (int p = lp[i]; p < end; p++)
+                {
+                    x[li[p]] -= lx[p] * x[i];
+                }
+            }
+
+            // Solve diagonal system, x = D\x.
+            for (int i = 0; i < n; i++)
+            {
+                x[i] *= ((Real)1.0 / d[i]);
             }
 
             // Solve upper triangular system by backward elimination, x = L'\x.

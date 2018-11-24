@@ -6,6 +6,7 @@ namespace CSparse.Tests.Complex.Factorization
     using NUnit.Framework;
     using System;
     using System.Numerics;
+    using Vector = CSparse.Complex.Vector;
 
     public class SparseCholeskyTest
     {

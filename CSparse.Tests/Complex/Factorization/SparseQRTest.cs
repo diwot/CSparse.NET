@@ -5,6 +5,7 @@ namespace CSparse.Tests.Complex.Factorization
     using CSparse.Complex.Factorization;
     using NUnit.Framework;
     using System.Numerics;
+    using Vector = CSparse.Complex.Vector;
 
     public class SparseQRTest
     {
